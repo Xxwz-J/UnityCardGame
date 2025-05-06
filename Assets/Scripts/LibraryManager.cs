@@ -26,10 +26,9 @@ public class LibraryManager : MonoBehaviour
 
     public void UpdateLibrary() {
         for (int i = 0; i < playerData.playerCards.Length; i++) {
-
-            for (int j = playerData.playerCards[i]; j > 0; j--) {
+            for (var card = playerData.playerCards[i].First;card!=null; card = card.Next) {
                 GameObject newcard=Instantiate(cardPrefab, libraryPanel.transform);
-                newcard.GetComponent<CardDisplay>().card = cardStore.cards[i];
+                newcard.GetComponent<CardDisplay>().card = card.Value;
             }
         }
     }

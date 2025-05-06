@@ -9,7 +9,8 @@ public class PlayerData : MonoBehaviour
     public TextAsset playerData;
     public CardStore CardStore;
 
-    public int[] playerCards;
+    //public int[] playerCards;
+    public LinkedList<Card>[] playerCards;
     // Start is called before the first frame update
     void Start()
     {
@@ -26,7 +27,12 @@ public class PlayerData : MonoBehaviour
     public void LoadPlayerData() {
 
         string[] dataRow = playerData.text.Split("\n");
-        playerCards = new int[CardStore.cards .Count];
+        //playerCards = new int[CardStore.cards .Count];
+        playerCards = new LinkedList<Card>[CardStore.cards.Count];
+        for (int i = 0; i < playerCards.Length; i++)
+        {
+            playerCards[i] = new LinkedList<Card>(); 
+        }
         foreach (string row in dataRow)
         {
             string[] rowArray = row.Split(',');
@@ -37,9 +43,8 @@ public class PlayerData : MonoBehaviour
             else if (rowArray[0] == "card")
             {
                 int id = int.Parse(rowArray[1]);
-                int quantity = int.Parse(rowArray[2]);
-                playerCards[id]= quantity;
-
+                var card =playerCards[id].AddLast(CardStore.cards[id]);
+                card.Value.Update(row);
             }
         }
     }
@@ -47,7 +52,13 @@ public class PlayerData : MonoBehaviour
         string path = Application.dataPath + "/Datas/playerdata.csv";
         List<string> datas = new List<string>();
         for (int i = 0; i < playerCards.Length; i++) {
-            if(playerCards[i]>0) datas.Add("card," + i.ToString()+","+playerCards[i].ToString());
+            int count = playerCards[i].Count;
+            LinkedListNode<Card> card=playerCards[i].First;
+            while (count > 0) { 
+                datas.Add("card," + i.ToString() + "," + card.Value.ToString()); 
+                count--;
+                card = card.Next;
+            }
         }
         File.WriteAllLines(path, datas);
     }

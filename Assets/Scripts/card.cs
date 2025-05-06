@@ -9,8 +9,10 @@ public class Card
         this.cardID = cardID;
         this.cardName = cardName;
     }
-}
 
+    public virtual void Update(string row) { }
+}
+//Tostring + Update
 
 public class MonsterCard : Card
 {
@@ -25,5 +27,18 @@ public class MonsterCard : Card
         this.health = health;
         this.healthmax = health;
         this.sacrifice = sacrifice;
+    }
+
+    public override string ToString()
+    {
+        return attack.ToString() + "," + healthmax.ToString();
+    }
+
+    public override void Update(string row)
+    {
+        string[] rowArray = row.Split(',');
+        int attack = int.Parse(rowArray[2]);
+        int health = int.Parse(rowArray[3]);
+       
     }
 }

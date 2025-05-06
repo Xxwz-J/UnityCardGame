@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -27,7 +28,7 @@ public class ClickedCard : MonoBehaviour,IPointerDownHandler
     }
     public void OnPointerDown(PointerEventData pointerEventData) {
         int id = this.GetComponent<CardDisplay>().card.cardID;
-        PlayerData.playerCards[id]++;
+        PlayerData.playerCards[id].AddLast(CardStore.cards[id]);
         PlayerData.SavePlayerData();
         OpenPackage.ClearPool();
     }
