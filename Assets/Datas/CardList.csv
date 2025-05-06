@@ -1,7 +1,7 @@
-﻿#,id,name,atk,health,sacrifice
-monster,0,松鼠,0,1,0
-monster,1,狼,3,2,2
-monster,2,幼狼,1,2,1
-monster,3,鹿,2,4,2
-monster,4,熊,4,4,3
-monster,5,白釉,1,3,1
+﻿#,id,name,atk,health,sacrifice,stamp
+monster,0,松鼠,0,1,0,NullStamp
+monster,1,狼,3,2,2,NullStamp
+monster,2,幼狼,1,2,1,Growth
+monster,3,鹿,2,4,2,Motion
+monster,4,熊,4,4,3,NullStamp
+monster,5,白釉,1,3,1,NullStamp

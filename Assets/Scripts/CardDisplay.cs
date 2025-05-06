@@ -39,6 +39,6 @@ public class CardDisplay : MonoBehaviour
 
             // Text.gameObject.SetActive(false)-- hide
         }
-
+        //还需更新印记显示
     }
 }

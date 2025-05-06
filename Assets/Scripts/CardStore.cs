@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,8 +39,9 @@ public class CardStore : MonoBehaviour
                 int attack = int.Parse(rowArray[3]);
                 int health = int.Parse(rowArray[4]);
                 int sacrifice = int.Parse(rowArray[5]);
+                Stamp stamp = (Stamp)Enum.Parse(typeof(Stamp), rowArray[6]);
 
-                MonsterCard monsterCard = new MonsterCard(id,name, attack, health, sacrifice);
+                MonsterCard monsterCard = new MonsterCard(id,name, attack, health, sacrifice,stamp);
                 cards.Add(monsterCard);
 
                 //Debug.Log("∂¡»°µΩπ÷ ﬁø®:"+monsterCard .cardName);
@@ -48,7 +50,7 @@ public class CardStore : MonoBehaviour
     }
         public Card RandomCard()
     {
-        Card card = cards[Random.Range(1, cards.Count)];
+        Card card = cards[UnityEngine.Random.Range(1, cards.Count)];
         return card;
     }
 
