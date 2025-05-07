@@ -13,6 +13,11 @@ public class Card
         this.cardName = cardName;
     }
 
+    public Card() {
+        this.cardID = 0;
+        this.cardName = "ËÉÊó";
+    }
+
     public virtual void Update(string row) { }
 }
 public enum Stamp
@@ -20,6 +25,7 @@ public enum Stamp
     NullStamp,//¿Õ
     Flying,//·ÉÐÐ
     Furcation,//·Ö²æ¹¥»÷
+    DoubleAttack,//Ë«ÖØ¹¥»÷
     Poison,//¶¾ËØ
     Defence,//×èµ²
     Growth,//³É³¤
@@ -34,6 +40,12 @@ public class MonsterCard : Card
     public int sacrifice;
     public Stamp[] stamps=new Stamp[3] { Stamp.NullStamp, Stamp.NullStamp, Stamp.NullStamp };
     public bool carved=false;
+    public MonsterCard():base(0,"ËÉÊó") {
+        this.attack = 0;
+        this.health = 1;
+        this.healthmax = 1;
+        this.sacrifice = 0;
+    }
     public MonsterCard(int cardID, string cardName,int attack, int health, int sacrifice) : base(cardID, cardName)
     {
         this.attack = attack;

@@ -50,7 +50,7 @@ public class CardStore : MonoBehaviour
     }
         public Card RandomCard()
     {
-        Card card = cards[UnityEngine.Random.Range(1, cards.Count)];
+        Card card = cards[UnityEngine.Random.Range(1, cards.Count-3)];
         return card;
     }
 
