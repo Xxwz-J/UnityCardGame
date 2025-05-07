@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -10,9 +11,11 @@ using UnityEngine.UIElements;
 public class playerbout : MonoBehaviour
 {
     public Canvas controller;
-    public List<GameObject> cards;
-    public List<GameObject> handcards;
-    public int num;
+    public GameObject newCard;//卡牌的预制体
+    public MonsterCard[] cards; //牌堆
+    public List<Card> handcards;//手牌
+    public int num; //手牌数量
+    private int index; //抽牌堆中第几张牌
     private gamecontroller con;
     private bool inited;
     private bool ready;
@@ -26,21 +29,72 @@ public class playerbout : MonoBehaviour
     private GameObject targetObj2;
     private GameObject targetObj3;
     private GameObject targetObj4;
+    private CardStore allCards;
+    private PlayerData data;
     // Start is called before the first frame update
     void Start()
     {
         inited = false;
         ready = false;
         selected = true;
+        index = 0;
         con = controller.GetComponent<gamecontroller>();
-        GetInitCards();
+        data = controller.GetComponent<PlayerData>();
+        allCards = GetComponent<CardStore>();
+        //GetInitCards();
+        num = 4;
         InitTarget();
         ShowCards();
     }
     private void GetInitCards()
     {
-        num = 4;
-        handcards = new List<GameObject>(4);
+        int n = 0;
+        for(int i=0;i<11;i++)
+        {
+            n += data.playerCards[i].Count;
+        }
+        cards = new MonsterCard[n];
+
+        int id = 0;
+        for (int i = 0; i < 11; i++)
+        {
+            int nu = data.playerCards[i].Count;
+            LinkedListNode<Card> p = data.playerCards[i].First;
+            for (int j = 0; j < nu; j++)
+            {
+                cards[id] = (MonsterCard)p.Value;
+                if (j != nu - 1)
+                    p = p.Next;
+            }
+        }
+        System.Random rng = new System.Random(); // 创建随机数生成器
+        int nn = cards.Length;
+        while (n > 1)
+        {
+            n--; // 当前未打乱的元素数量
+            int k = rng.Next(n + 1); // 随机选择一个索引
+            MonsterCard temp = cards[k]; // 交换当前元素和随机选中的元素
+            cards[k] = cards[n];
+            cards[n] = temp;
+        }
+        if (cards[0].sacrifice!=1)
+        {
+            int m = 1;
+            while(m<n)
+            {
+                if (cards[m].sacrifice == 1)
+                {
+                    MonsterCard temp = cards[0]; // 交换当前元素和随机选中的元素
+                    cards[0] = cards[m];
+                    cards[m] = temp;
+                }
+                else m++;
+            }
+        }
+        handcards.Add(GetBasicCard());
+        handcards.Add(GetOneHandCard());
+        handcards.Add(GetOneHandCard());
+        handcards.Add(GetOneHandCard());
     }
     private void ShowCards()
     {
@@ -55,11 +109,11 @@ public class playerbout : MonoBehaviour
     }
     private void BuildShowedcard(Vector2 position, Vector2 size,int id)
     {
-        GameObject square = new GameObject("UI Square");
+        GameObject square = Instantiate(newCard);
 
         square.transform.SetParent(FindObjectOfType<Canvas>().transform);
 
-        RectTransform rectTransform = square.AddComponent<RectTransform>();
+        RectTransform rectTransform = square.GetComponent<RectTransform>();
         square.transform.SetParent(transform, false);
 
         rectTransform.anchoredPosition = position;
@@ -130,13 +184,22 @@ public class playerbout : MonoBehaviour
             ready = false;
         }
     }
+    private Card GetOneHandCard()
+    {
+        index++;
+        return cards[index];
+    }
+    private Card GetBasicCard()
+    {
+        Card newcard = new Card();
+        newcard = allCards.cards[0];
+        return newcard;
+    }
     public void OnClick1()
     {
         if (con.isplayerbout && !selected)
         {
-            GameObject newcard = cards[0];
-            cards.Remove(newcard);
-            handcards.Add(newcard);
+            handcards.Add(GetOneHandCard());
             Destroyshowedcards();
             num++;
             ShowCards();
@@ -147,8 +210,7 @@ public class playerbout : MonoBehaviour
     {
         if (con.isplayerbout && !selected)
         {
-            GameObject newcard = new GameObject();
-            handcards.Add(newcard);
+            handcards.Add(GetBasicCard());
             Destroyshowedcards();
             num++;
             ShowCards();

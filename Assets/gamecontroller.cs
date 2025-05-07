@@ -6,26 +6,29 @@ using UnityEngine;
 
 public class gamecontroller : MonoBehaviour
 {
-    public bool isplayerbout;
-    public GameObject[] playercards = new GameObject[4];
-    public GameObject[] allEnemy;
-    public bool[] isEmpty;
-    public bool[] isUsed;
+    public bool isplayerbout; //是否是玩家回合
+    public MonsterCard[] playercards = new MonsterCard[4];
+    public MonsterCard[] allEnemy; //敌人出现顺序
+    public bool[] isEmpty; //玩家方是否有出战牌
+    public bool[] isUsed;//是否被选择献祭
     public Camera uiCamera;
-    private int numofRound = 0;
-    private GameObject[] firstlinecards;
-    private GameObject[] secondlinecards;
-    private Queue<GameObject> firstline;
-    private Queue<GameObject> secondline;
-    private Queue<GameObject> thirdline;
-    private Queue<GameObject> fourthline;
-    private bool begin;
-    private bool ready;
+    private int numofRound = 0;//回合数
+    private MonsterCard[] firstlinecards;//第一排敌人
+    private MonsterCard[] secondlinecards;//第二排敌人
+    private Queue<MonsterCard> firstline;//第一列敌人
+    private Queue<MonsterCard> secondline;//第二列敌人
+    private Queue<MonsterCard> thirdline;//第三列敌人
+    private Queue<MonsterCard> fourthline;//第四列敌人
+    private bool begin;//玩家是否攻击
+    private bool ready;//敌方是否攻击
+    private int idofDe1; //玩家方阻挡印记拥有者id
+    private int idofDe2; //敌方阻挡印记拥有者id
     private int damagePlayerReceived;
     private int damageEnemyReceived;
     private bool gameOver;
     private Vector3 v1 = new Vector3(0, 0, -100);
     private Vector3 v2 = new Vector3(0, -170, -100);
+    private CardStore data;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +36,8 @@ public class gamecontroller : MonoBehaviour
         isplayerbout = true;
         begin = false;
         ready = false;
+        idofDe1 = -1;
+        idofDe2 = -1;
         isEmpty = new bool[4];
         isUsed = new bool[4];
         for (int i = 0; i < 4; i++)
@@ -42,8 +47,9 @@ public class gamecontroller : MonoBehaviour
         damageEnemyReceived = 0;
         damagePlayerReceived = 0;
         gameOver = false;
-        firstlinecards = new GameObject[4];
-        secondlinecards = new GameObject[4];
+        firstlinecards = new MonsterCard[4];
+        secondlinecards = new MonsterCard[4];
+        data = GetComponent<CardStore>();
         //InitEnemy();
     }
     // Update is called once per frame
@@ -188,29 +194,303 @@ public class gamecontroller : MonoBehaviour
             //战败play
         }
     }
+    private void Stamps1(int id)
+    {
+        bool isFlying = false;
+        bool isFur = false;
+        bool isPio = false;
+        bool isGro = false;
+        bool isMot = false;
+        FindDefStamp();
+        for (int i=0;i<3;i++)
+        {
+            switch (playercards[id].stamps[i])
+            {
+                case Stamp.Flying:
+                    isFlying = true;
+                    break;
+                case Stamp.Furcation:
+                    isFur = true;
+                    break;
+                case Stamp.Poison:
+                    isPio = true;
+                    break;
+                case Stamp.Growth:
+                    isGro = true;
+                    GrowthStamp1(id);
+                    break;
+                case Stamp.Motion:
+                    isMot = true;
+                    break;
+            }
+        }
+        if(isFur)
+        {
+            if(isFlying)
+            {
+                damageEnemyReceived += playercards[id].attack * 2;
+            }
+            else if(isPio)
+            {
+                if (id > 0)
+                {
+                    if (firstlinecards[id - 1] != null)
+                        firstlinecards[id - 1].health = 0;
+                    else damageEnemyReceived += playercards[id].attack;
+                }
+                if (id < 3)
+                {
+                    if (firstlinecards[id + 1] != null)
+                        firstlinecards[id + 1].health = 0;
+                    else damageEnemyReceived += playercards[id].attack;
+                }
+            }
+            else
+            {
+                if (id>0)
+                {
+                    AttackFront1(playercards[id], id - 1);
+                }
+                if(id<3)
+                {
+                    AttackFront1(playercards[id], id + 1);
+                }
+            }
+        }
+        else
+        {
+            AttackFront1(playercards[id], id);
+        }
+        if(isGro)
+        {
+            GrowthStamp1(id);
+        }
+        if(isMot)
+        {
+            if (id > 0 && playercards[id-1]==null)
+            {
+                playercards[id - 1] = playercards[id];
+                playercards[id] = null;
+            }
+            else if (id < 3 && playercards[id+1]==null)
+            {
+                playercards[id + 1] = playercards[id];
+                playercards[id] = null;
+            }
+        }
+    }
+    private void Stamps2(int id)
+    {
+        bool isFlying = false;
+        bool isFur = false;
+        bool isPio = false;
+        bool isGro = false;
+        bool isMot = false;
+        FindDefStamp();
+        for (int i = 0; i < 3; i++)
+        {
+            switch (firstlinecards[id].stamps[i])
+            {
+                case Stamp.Flying:
+                    isFlying = true;
+                    break;
+                case Stamp.Furcation:
+                    isFur = true;
+                    break;
+                case Stamp.Poison:
+                    isPio = true;
+                    break;
+                case Stamp.Growth:
+                    isGro = true;
+                    GrowthStamp2(id);
+                    break;
+                case Stamp.Motion:
+                    isMot = true;
+                    break;
+            }
+        }
+        if (isFur)
+        {
+            if (isFlying)
+            {
+                damagePlayerReceived += firstlinecards[id].attack * 2;
+            }
+            else if (isPio)
+            {
+                if (id > 0)
+                {
+                    if (playercards[id - 1] != null)
+                        playercards[id - 1].health = 0;
+                    else damagePlayerReceived += firstlinecards[id].attack;
+                }
+                if (id < 3)
+                {
+                    if (playercards[id + 1] != null)
+                        playercards[id + 1].health = 0;
+                    else damagePlayerReceived += firstlinecards[id].attack;
+                }
+            }
+            else
+            {
+                if (id > 0)
+                {
+                    AttackFront2(firstlinecards[id], id - 1);
+                }
+                if (id < 3)
+                {
+                    AttackFront2(firstlinecards[id], id + 1);
+                }
+            }
+        }
+        else
+        {
+            AttackFront2(firstlinecards[id], id);
+        }
+        if (isGro)
+        {
+            GrowthStamp2(id);
+        }
+        if (isMot)
+        {
+            if (id > 0 && firstlinecards[id - 1] == null)
+            {
+                firstlinecards[id - 1] = firstlinecards[id];
+                firstlinecards[id] = null;
+            }
+            else if (id < 3 && firstlinecards[id + 1] == null)
+            {
+                firstlinecards[id + 1] = firstlinecards[id];
+                firstlinecards[id] = null;
+            }
+        }
+    }
+    private void AttackFront1(MonsterCard card,int id)
+    {
+        if (firstlinecards[id] == null|| firstlinecards[id].health==0)
+            if(idofDe2==-1)
+                damageEnemyReceived += card.attack;
+            else
+            {
+                firstlinecards[id] = firstlinecards[idofDe2];
+                idofDe2 = id;
+                AttackFront1(card, id);
+            }
+        else
+            {
+                if (card.attack > firstlinecards[id].health)
+                {
+                    if (card.attack - firstlinecards[id].health > secondlinecards[id].health)
+                        secondlinecards[id].health = 0;
+                    else secondlinecards[id].health -= (card.attack - firstlinecards[id].health);
+                    firstlinecards[id].health = 0;
+                }
+                else firstlinecards[id].health -= card.attack;
+            }
+    }
+
+    private void AttackFront2(MonsterCard card, int id)
+    {
+        if (playercards[id] == null || playercards[id].health==0)
+            if(idofDe1==-1)
+                damagePlayerReceived += card.attack;
+            else
+            {
+                playercards[id] = playercards[idofDe1];
+                idofDe1 = id;
+                AttackFront2(card, id);
+            }
+        else
+            {
+                if (card.attack > playercards[id].health)
+                {
+                    playercards[id].health = 0;
+                }
+                else playercards[id].health -= card.attack;
+            }
+    }
+    private void GrowthStamp1(int id)
+    {
+        switch(playercards[id].cardID)
+        {
+            case 2:
+                playercards[id] = data.cards[3];
+                break;
+            case 4:
+                playercards[id] = data.cards[5];
+                break;
+            case 10:
+                playercards[id] = data.cards[11];
+                break;
+            default:
+                playercards[id].attack += 1;
+                playercards[id].health += 2;
+                playercards[id].cardName = "长毛" + playercards[id].cardName;
+                break;
+        }
+    }
+
+    private void GrowthStamp2(int id)
+    {
+        switch (firstlinecards[id].cardID)
+        {
+            case 2:
+                firstlinecards[id] = data.cards[3];
+                break;
+            case 4:
+                firstlinecards[id] = data.cards[5];
+                break;
+            case 10:
+                firstlinecards[id] = data.cards[11];
+                break;
+            default:
+                firstlinecards[id].attack += 1;
+                firstlinecards[id].health += 2;
+                firstlinecards[id].cardName = "长毛" + firstlinecards[id].cardName;
+                break;
+        }
+    }
+    private void FindDefStamp()
+    {
+        for(int i=0;i<4;i++)
+        {
+            for(int j=0;j<3;j++)
+                if (playercards[i].stamps[j]==Stamp.Defence)
+                {
+                    idofDe1 = i;
+                    break;
+                }
+            for(int j=0;j<3;j++)
+                if (firstlinecards[i].stamps[j]==Stamp.Defence)
+                {
+                    idofDe2 = i;
+                    break;
+                }
+        }
+    }
     private void AttackEvent()
     {
-        int timer = 0;
-        while(timer<800)
-        {
-            timer += 1;
-        }
         if (!begin)
         {
             for (int i = 0; i < 4; i++)
             {
-                //激活刻印
-                if (firstlinecards[i] == null)
-                    damageEnemyReceived++;  //
+                int timer = 0;
+                while (timer < 800)
+                {
+                    timer += 1;
+                }
+                Stamps1(i);
             }
         }
         else
         {
             for (int i = 0; i < 4; i++)
             {
-                //激活刻印
-                if (playercards[i] == null)
-                    damagePlayerReceived++;  //
+                int timer = 0;
+                while (timer < 800)
+                {
+                    timer += 1;
+                }
+                Stamps2(i);
             }
         }
     }

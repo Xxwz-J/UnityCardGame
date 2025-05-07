@@ -13,12 +13,10 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     public GameObject TargetArea2; // 目标区域1
     public GameObject TargetArea3; // 目标区域1
     public GameObject TargetArea4; // 目标区域1
-    public GameObject card;
+    public Card card;
     public Canvas controller;
     public GameObject player;
     public float snapDistance = 50f; // 吸附距离(像素)
-    public Color normalColor = Color.blue;
-    public Color highlightColor = Color.green;
     public bool isPlaced = false;
 
     private RectTransform targetArea1;
@@ -41,7 +39,6 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         rectTransform = GetComponent<RectTransform>();
         image = GetComponent<Image>();
         originalPosition = rectTransform.anchoredPosition;
-        image.color = normalColor;
     }
     void Start ()
     {
@@ -92,7 +89,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private void SetPlayedcards()
     {
         gamecontroller con= controller.GetComponent<gamecontroller>();
-        con.playercards[idoftarget - 1] = card;
+        //con.playercards[idoftarget - 1] = card;
         playerbout pla = player.GetComponent<playerbout>();
         pla.num--;
         pla.handcards.Remove(card);
@@ -169,9 +166,6 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             isInTargetArea = false;
             idoftarget = 0;
         }
-
-        // 更新颜色反馈
-        image.color = isInTargetArea ? highlightColor : normalColor;
     }
 
     // 吸附到目标位置
