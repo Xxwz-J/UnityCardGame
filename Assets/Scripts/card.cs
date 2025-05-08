@@ -79,4 +79,24 @@ public class MonsterCard : Card
         stamps[2] = (Stamp)Enum.Parse(typeof(Stamp), rowArray[6]);
         carved = bool.Parse(rowArray[7]);
     }
+
+    public MonsterCard(MonsterCard other) : base(other.cardID, other.cardName)
+    {
+        this.attack = other.attack;
+        this.health = other.health;
+        this.healthmax = other.health;
+        this.sacrifice = other.sacrifice;
+        Array.Copy(other.stamps, this.stamps, 3);
+
+    }
+
+    public int countstamp()
+    {
+        int a = 0;
+        foreach(Stamp stamp in stamps)
+        {
+            if (stamp != Stamp.NullStamp) a++;
+        }
+        return a;
+    }
 }

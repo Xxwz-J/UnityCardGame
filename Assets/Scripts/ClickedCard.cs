@@ -28,7 +28,7 @@ public class ClickedCard : MonoBehaviour,IPointerDownHandler
     }
     public void OnPointerDown(PointerEventData pointerEventData) {
         int id = this.GetComponent<CardDisplay>().card.cardID;
-        PlayerData.playerCards[id].AddLast(CardStore.cards[id]);
+        PlayerData.playerCards[id].AddLast(new MonsterCard((MonsterCard)CardStore.cards[id]));
         PlayerData.SavePlayerData();
         OpenPackage.ClearPool();
     }
