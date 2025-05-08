@@ -25,7 +25,6 @@ public class PlayerData : MonoBehaviour
     }
 
     public void LoadPlayerData() {
-
         string[] dataRow = playerData.text.Split("\n");
         //playerCards = new int[CardStore.cards .Count];
         playerCards = new LinkedList<Card>[CardStore.cards.Count];
@@ -43,7 +42,7 @@ public class PlayerData : MonoBehaviour
             else if (rowArray[0] == "card")
             {
                 int id = int.Parse(rowArray[1]);
-                var card =playerCards[id].AddLast(CardStore.cards[id]);
+                var card =playerCards[id].AddLast(new MonsterCard((MonsterCard)CardStore.cards[id]));
                 card.Value.Update(row);
             }
         }
