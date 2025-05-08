@@ -41,6 +41,24 @@ public class MonsterCard : Card
         this.healthmax = health;
         this.sacrifice = sacrifice;
     }
+    public MonsterCard(MonsterCard card)
+    {
+        this.attack = card.attack;
+        this.health = card.health;
+        this.healthmax = card.health;
+        this.sacrifice = card.sacrifice;
+        this.stamps = new Stamp[3] { card.stamps[0], card.stamps[1], card.stamps[2] };
+        cardID = card.cardID;
+        cardName = card.cardName;
+    }
+    public MonsterCard()
+    {
+        this.attack = 0;
+        this.health = 0;
+        this.healthmax = 0;
+        this.sacrifice = 0;
+        this.stamps = new Stamp[3] { Stamp.NullStamp, Stamp.NullStamp, Stamp.NullStamp };
+    }
     public MonsterCard(int cardID, string cardName, int attack, int health, int sacrifice, Stamp stamp) : base(cardID, cardName)
     {
         this.attack = attack;

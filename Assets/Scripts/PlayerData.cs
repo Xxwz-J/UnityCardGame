@@ -53,7 +53,7 @@ public class PlayerData : MonoBehaviour
         List<string> datas = new List<string>();
         for (int i = 0; i < playerCards.Length; i++) {
             int count = playerCards[i].Count;
-            LinkedListNode<Card> card=playerCards[i].First;
+            LinkedListNode<Card> card = playerCards[i].First;
             while (count > 0) { 
                 datas.Add("card," + i.ToString() + "," + card.Value.ToString()); 
                 count--;

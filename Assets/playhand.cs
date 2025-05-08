@@ -13,7 +13,8 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     public GameObject TargetArea2; // 目标区域1
     public GameObject TargetArea3; // 目标区域1
     public GameObject TargetArea4; // 目标区域1
-    public Card card;
+    public MonsterCard card;
+    public GameObject showedcard;
     public Canvas controller;
     public GameObject player;
     public float snapDistance = 50f; // 吸附距离(像素)
@@ -29,6 +30,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private bool isInTargetArea = false;
     public int idoftarget;
     private bool allowDragging = true;
+    private gamecontroller con;
 
     [Header("拖拽限制")]
     public bool limitDragArea = true;
@@ -46,21 +48,20 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         targetArea2 = TargetArea2.GetComponent<RectTransform>();
         targetArea3 = TargetArea3.GetComponent<RectTransform>();
         targetArea4 = TargetArea4.GetComponent<RectTransform>();
+        con = controller.GetComponent<gamecontroller>();
     }
 
     // 开始拖拽
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (!allowDragging) return;
-        gamecontroller con = controller.GetComponent<gamecontroller>();
-        if (!con.isplayerbout) return;
+        if (!allowDragging|| !con.isplayerbout) return;
         // 可以在这里添加拖拽开始时的逻辑
     }
 
     // 拖拽过程中
     public void OnDrag(PointerEventData eventData)
     {
-        if (!allowDragging) return;
+        if (!allowDragging || !con.isplayerbout) return;
         // 将屏幕坐标转换为Canvas局部坐标
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             rectTransform.parent as RectTransform,
@@ -91,18 +92,48 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         gamecontroller con= controller.GetComponent<gamecontroller>();
         //con.playercards[idoftarget - 1] = card;
         playerbout pla = player.GetComponent<playerbout>();
-        pla.num--;
+        Attack a = showedcard.GetComponent<Attack>();
+        a.target = con.firstv[idoftarget];
+        a.target1 = con.showedpla[idoftarget];
         pla.handcards.Remove(card);
+        con.showedpla[idoftarget] = showedcard;
+        pla.showedCards.Remove(showedcard);
+        pla.CardsMove();
     }
 
+    private bool MeetCon()
+    {
+        int num = 0;
+        for(int i=0;i<4;i++)
+        {
+            if (con.isUsed[i] == true)
+                num++;
+        }
+        return num >= card.sacrifice;
+    }
+
+    private void DelUsedcards()
+    {
+        int num = card.sacrifice;
+        for(int i=0;i<4;i++)
+        {
+            if (con.isUsed[i] && num > 0)
+            {
+                con.playercards[i] = null;
+                num--;
+            }
+        }
+    }
     // 结束拖拽
     public void OnEndDrag(PointerEventData eventData)
     {
+        if (!allowDragging || !con.isplayerbout) return;
+
         // 检查是否在目标区域内
         CheckIfInTargetArea();
-        if (!allowDragging) return;
-        if (isInTargetArea)
+        if (isInTargetArea && MeetCon())
         {
+            DelUsedcards();
             // 成功放到目标区域
             SnapToTarget();
             //SetPlayedcards();
@@ -171,7 +202,6 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // 吸附到目标位置
     private void SnapToTarget()
     {
-        gamecontroller con = controller.GetComponent<gamecontroller>();
         switch (idoftarget)
         {
             case 1:

@@ -11,20 +11,19 @@ using UnityEngine.UIElements;
 public class playerbout : MonoBehaviour
 {
     public Canvas controller;
+    public GameObject button;
     public GameObject newCard;//卡牌的预制体
     public MonsterCard[] cards; //牌堆
-    public List<Card> handcards;//手牌
-    public int num; //手牌数量
+    public List<MonsterCard> handcards;//手牌
+    public List<GameObject> showedCards;
     private int index; //抽牌堆中第几张牌
     private gamecontroller con;
     private bool inited;
     private bool ready;
     private bool selected;
-    private Vector2 position1 = new Vector2(-268, 103);
-    private Vector2 position2 = new Vector2(-118, 103);
-    private Vector2 position3 = new Vector2(32, 103);
-    private Vector2 position4 = new Vector2(182, 103);
-    private Vector2 size1 = new Vector2(50, 50);
+    private Vector2 positionInit = new Vector2(317, 103);
+    private Vector2[] position = new Vector2[4];
+    private Vector2 size = new Vector2(107, 133);
     private GameObject targetObj1;
     private GameObject targetObj2;
     private GameObject targetObj3;
@@ -38,13 +37,23 @@ public class playerbout : MonoBehaviour
         ready = false;
         selected = true;
         index = 0;
-        con = controller.GetComponent<gamecontroller>();
+    position[0] = new Vector2(-268, 103);
+    position[1] = new Vector2(-118, 103);
+    position[2] = new Vector2(32, 103);
+    position[3] = new Vector2(182, 103);
+    con = controller.GetComponent<gamecontroller>();
         data = controller.GetComponent<PlayerData>();
         allCards = GetComponent<CardStore>();
-        //GetInitCards();
-        num = 4;
+        GetInitCards1();
         InitTarget();
-        ShowCards();
+        CardsMove();
+    }
+    private void GetInitCards1()
+    {
+        handcards.Add(GetBasicCard());
+        handcards.Add(new MonsterCard((MonsterCard)allCards.cards[3]));
+        handcards.Add(new MonsterCard((MonsterCard)allCards.cards[1]));
+        handcards.Add(new MonsterCard((MonsterCard)allCards.cards[9]));
     }
     private void GetInitCards()
     {
@@ -59,12 +68,13 @@ public class playerbout : MonoBehaviour
         for (int i = 0; i < 11; i++)
         {
             int nu = data.playerCards[i].Count;
-            LinkedListNode<Card> p = data.playerCards[i].First;
+            LinkedListNode<Card> q = data.playerCards[i].First;
             for (int j = 0; j < nu; j++)
             {
-                cards[id] = (MonsterCard)p.Value;
+                MonsterCard p = (MonsterCard)q.Value;
+                cards[id] = p;
                 if (j != nu - 1)
-                    p = p.Next;
+                    q = q.Next;
             }
         }
         System.Random rng = new System.Random(); // 创建随机数生成器
@@ -96,20 +106,10 @@ public class playerbout : MonoBehaviour
         handcards.Add(GetOneHandCard());
         handcards.Add(GetOneHandCard());
     }
-    private void ShowCards()
-    {
-        Vector2 size = new Vector2(107, 133);
-        int setx = 60 - 120 * (num / 2);
-        for(int i=0;i<num;i++)
-        {
-            Vector2 position = new Vector2(setx, -80);
-            BuildShowedcard(position, size,i);
-            setx += 120;
-        }
-    }
-    private void BuildShowedcard(Vector2 position, Vector2 size,int id)
+    private void BuildShowedcard(Vector2 position, Vector2 size,MonsterCard card)
     {
         GameObject square = Instantiate(newCard);
+        square.GetComponent<CardDisplay>().card = card;
 
         square.transform.SetParent(FindObjectOfType<Canvas>().transform);
 
@@ -126,20 +126,28 @@ public class playerbout : MonoBehaviour
         thisone.TargetArea3 = targetObj3;
         thisone.TargetArea4 = targetObj4;
         thisone.controller = controller;
-        //thisone.card = handcards[id];
+        thisone.card = card;
+        thisone.showedcard = square;
 
         square.AddComponent<SelectObl>();
+        square.AddComponent<Rigidbody>();
+        Attack a=square.AddComponent<Attack>();
+        a.enabled = false;
+        Shake s=square.AddComponent<Shake>();
+        s.enabled = false;
+        DelEvent d=square.AddComponent<DelEvent>();
+        d.enabled = false;
+        showedCards.Add(square);
     }
-    private void Destroyshowedcards()
+    public void CardsMove()
     {
+        int num = handcards.Count;
+        float setx = 60 - 120 * (num / 2);
         for(int i=0;i<num;i++)
         {
-            GameObject square = GameObject.Find("UI Square");
-            if (square != null)
-            {
-                Destroy(square);
-            }
-            else break;
+            Vector2 position = new Vector2(setx, -80);
+            Transform t = showedCards[i].GetComponent<Transform>();
+            t.position = Vector3.MoveTowards(t.position, position, 5.0f * Time.deltaTime);
         }
     }
     private void InitTarget()
@@ -147,26 +155,26 @@ public class playerbout : MonoBehaviour
         targetObj1 = new GameObject("DragTarget1");
         RectTransform tempTarget1 = targetObj1.AddComponent<RectTransform>();
         tempTarget1.transform.SetParent(transform, false);
-        tempTarget1.anchoredPosition = position1;
-        tempTarget1.sizeDelta = size1;
+        tempTarget1.anchoredPosition = position[0];
+        tempTarget1.sizeDelta = size;
 
         targetObj2 = new GameObject("DragTarget2");
         RectTransform tempTarget2 = targetObj2.AddComponent<RectTransform>();
         tempTarget2.transform.SetParent(transform, false);
-        tempTarget2.anchoredPosition = position2;
-        tempTarget2.sizeDelta = size1;
+        tempTarget2.anchoredPosition = position[1];
+        tempTarget2.sizeDelta = size;
 
         targetObj3 = new GameObject("DragTarget3");
         RectTransform tempTarget3 = targetObj3.AddComponent<RectTransform>();
         tempTarget3.transform.SetParent(transform, false);
-        tempTarget3.anchoredPosition = position3;
-        tempTarget3.sizeDelta = size1;
+        tempTarget3.anchoredPosition = position[2];
+        tempTarget3.sizeDelta = size;
 
         targetObj4 = new GameObject("DragTarget4");
         RectTransform tempTarget4 = targetObj4.AddComponent<RectTransform>();
         tempTarget4.transform.SetParent(transform, false);
-        tempTarget4.anchoredPosition = position4;
-        tempTarget4.sizeDelta = size1;
+        tempTarget4.anchoredPosition = position[3];
+        tempTarget4.sizeDelta = size;
 
         inited = true;
     }
@@ -184,25 +192,28 @@ public class playerbout : MonoBehaviour
             ready = false;
         }
     }
-    private Card GetOneHandCard()
+    private MonsterCard GetOneHandCard()
     {
         index++;
+        if(index==cards.Length-1)
+        {
+            button.SetActive(false);
+        }
         return cards[index];
     }
-    private Card GetBasicCard()
+    private MonsterCard GetBasicCard()
     {
-        Card newcard = new Card();
-        newcard = allCards.cards[0];
+        MonsterCard newcard = new MonsterCard((MonsterCard)allCards.cards[0]);
         return newcard;
     }
     public void OnClick1()
     {
         if (con.isplayerbout && !selected)
         {
-            handcards.Add(GetOneHandCard());
-            Destroyshowedcards();
-            num++;
-            ShowCards();
+            MonsterCard newone = GetOneHandCard();
+            handcards.Add(newone);
+            BuildShowedcard(positionInit, size, newone);
+            CardsMove();
             selected = true;
         }
     }
@@ -210,10 +221,10 @@ public class playerbout : MonoBehaviour
     {
         if (con.isplayerbout && !selected)
         {
-            handcards.Add(GetBasicCard());
-            Destroyshowedcards();
-            num++;
-            ShowCards();
+            MonsterCard newone = GetBasicCard();
+            handcards.Add(newone);
+            BuildShowedcard(positionInit, size, newone);
+            CardsMove();
             selected = true;
         }
     }

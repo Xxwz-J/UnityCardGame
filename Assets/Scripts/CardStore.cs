@@ -6,7 +6,7 @@ using UnityEngine;
 public class CardStore : MonoBehaviour
 {
     public TextAsset cardData;
-    public List<MonsterCard> cards = new List<MonsterCard>();
+    public List<Card> cards = new List<Card>();
 
 
 
