@@ -11,7 +11,7 @@ public class gamecontroller : MonoBehaviour
     public bool isplayerbout; //是否是玩家回合
     public MonsterCard[] playercards = new MonsterCard[4];
     public GameObject[] showedpla = new GameObject[4];
-    public MonsterCard[] allEnemy; //敌人出现顺序
+    public MonsterCard[] allEnemy=new MonsterCard[20]; //敌人出现顺序
     public bool[] isEmpty; //玩家方是否有出战牌
     public bool[] isUsed;//是否被选择献祭
     public Camera uiCamera;
@@ -20,10 +20,10 @@ public class gamecontroller : MonoBehaviour
     public GameObject[] firshowed;
     private MonsterCard[] secondlinecards;//第二排敌人
     private GameObject[] secshowed;
-    private Queue<MonsterCard> firstline;//第一列敌人
-    private Queue<MonsterCard> secondline;//第二列敌人
-    private Queue<MonsterCard> thirdline;//第三列敌人
-    private Queue<MonsterCard> fourthline;//第四列敌人
+    private Queue<MonsterCard> firstline=new Queue<MonsterCard>();//第一列敌人
+    private Queue<MonsterCard> secondline=new Queue<MonsterCard>();//第二列敌人
+    private Queue<MonsterCard> thirdline=new Queue<MonsterCard>();//第三列敌人
+    private Queue<MonsterCard> fourthline=new Queue<MonsterCard>();//第四列敌人
     private bool begin;//玩家是否攻击
     private bool ready;//敌方是否攻击
     private int idofDe1; //玩家方阻挡印记拥有者id
@@ -50,7 +50,9 @@ public class gamecontroller : MonoBehaviour
         isEmpty = new bool[4];
         isUsed = new bool[4];
         firstlinecards = new MonsterCard[4];
+        firshowed = new GameObject[4];
         secondlinecards = new MonsterCard[4];
+        secshowed = new GameObject[4];
         for (int i = 0; i < 4; i++)
         {
             isEmpty[i] = true;
@@ -124,7 +126,6 @@ public class gamecontroller : MonoBehaviour
             rectTransform.sizeDelta = size;
 
             square.AddComponent<SelectObl>();
-            square.AddComponent<Rigidbody>();
             Attack a = square.AddComponent<Attack>();
             a.enabled = false;
             Shake s = square.AddComponent<Shake>();
@@ -135,17 +136,19 @@ public class gamecontroller : MonoBehaviour
                 firshowed[id] = square;
             else if (line == 2)
                 secshowed[id] = square;
-            a.target = positionpla[id];
-            a.target1 = showedpla[id];
+            a.targetPosition = showedpla[id].GetComponent<Transform>().position;
         }
     }
     //敌人卡牌从第二排进入第一排
     private void CardMove(int id)
     {
-        Transform t = secshowed[id].GetComponent<Transform>();
-        t.position = Vector3.MoveTowards(t.position, firstv[id], 5.0f * Time.deltaTime);
-        firshowed[id] = secshowed[id];
-        secshowed[id] = null;
+        if (secshowed[id] != null)
+        {
+            Transform t = secshowed[id].GetComponent<Transform>();
+            t.position = Vector3.MoveTowards(t.position, firstv[id], 500.0f * Time.deltaTime);
+            firshowed[id] = secshowed[id];
+            secshowed[id] = null;
+        }
     }
     //初始加载第一排敌人
     private void InitEnemy()
@@ -199,7 +202,7 @@ public class gamecontroller : MonoBehaviour
             LoadEnemy();
         }
     }
-    //每回合加载敌人
+    //每回合加载第二排敌人
     private void LoadEnemy()
     {
         numofRound++;
@@ -576,17 +579,19 @@ public class gamecontroller : MonoBehaviour
         for(int i=0;i<4;i++)
         {
             for(int j=0;j<3;j++)
-                if (playercards[i].stamps[j]==Stamp.Defence)
-                {
-                    idofDe1 = i;
-                    break;
-                }
+                if (playercards[i]!=null)
+                    if (playercards[i].stamps[j]==Stamp.Defence)
+                    {
+                        idofDe1 = i;
+                        break;
+                    }
             for(int j=0;j<3;j++)
-                if (firstlinecards[i].stamps[j]==Stamp.Defence)
-                {
-                    idofDe2 = i;
-                    break;
-                }
+                if (firstlinecards[i]!=null)
+                    if (firstlinecards[i].stamps[j]==Stamp.Defence)
+                    {
+                        idofDe2 = i;
+                        break;
+                    }
         }
     }
     //攻击事件
@@ -601,8 +606,11 @@ public class gamecontroller : MonoBehaviour
                 {
                     timer += 1;
                 }
-                showedpla[i].GetComponent<Attack>().enabled = true;
-                Stamps1(i);
+                if (playercards[i] != null)
+                {
+                    showedpla[i].GetComponent<Attack>().enabled = true;
+                    Stamps1(i);
+                }
             }
         }
         else
@@ -614,8 +622,11 @@ public class gamecontroller : MonoBehaviour
                 {
                     timer += 1;
                 }
-                firshowed[i].GetComponent<Attack>().enabled = true;
-                Stamps2(i);
+                if (firstlinecards[i] != null)
+                {
+                    firshowed[i].GetComponent<Attack>().enabled = true;
+                    Stamps2(i);
+                }
             }
         }
     }

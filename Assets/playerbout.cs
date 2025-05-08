@@ -13,9 +13,9 @@ public class playerbout : MonoBehaviour
     public Canvas controller;
     public GameObject button;
     public GameObject newCard;//卡牌的预制体
-    public MonsterCard[] cards; //牌堆
-    public List<MonsterCard> handcards;//手牌
-    public List<GameObject> showedCards;
+    public MonsterCard[] cards=new MonsterCard[4]; //牌堆
+    public List<MonsterCard> handcards=new List<MonsterCard>();//手牌
+    public List<GameObject> showedCards = new List<GameObject>();
     private int index; //抽牌堆中第几张牌
     private gamecontroller con;
     private bool inited;
@@ -37,23 +37,34 @@ public class playerbout : MonoBehaviour
         ready = false;
         selected = true;
         index = 0;
-    position[0] = new Vector2(-268, 103);
-    position[1] = new Vector2(-118, 103);
-    position[2] = new Vector2(32, 103);
-    position[3] = new Vector2(182, 103);
-    con = controller.GetComponent<gamecontroller>();
+        position[0] = new Vector2(-268, 103);
+        position[1] = new Vector2(-118, 103);
+        position[2] = new Vector2(32, 103);
+        position[3] = new Vector2(182, 103);
+        con = controller.GetComponent<gamecontroller>();
         data = controller.GetComponent<PlayerData>();
-        allCards = GetComponent<CardStore>();
-        GetInitCards1();
+        allCards = controller.GetComponent<CardStore>();
         InitTarget();
-        CardsMove();
+        GetInitCards1();
     }
     private void GetInitCards1()
     {
-        handcards.Add(GetBasicCard());
-        handcards.Add(new MonsterCard((MonsterCard)allCards.cards[3]));
-        handcards.Add(new MonsterCard((MonsterCard)allCards.cards[1]));
-        handcards.Add(new MonsterCard((MonsterCard)allCards.cards[9]));
+        MonsterCard newone = GetBasicCard();
+        handcards.Add(newone);
+        BuildShowedcard(positionInit, size, newone);
+        CardsMove();
+        MonsterCard newone1 = new MonsterCard((MonsterCard)allCards.cards[5]);
+        handcards.Add(newone1);
+        BuildShowedcard(positionInit, size, newone1);
+        CardsMove();
+        MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[1]);
+        handcards.Add(newone2);
+        BuildShowedcard(positionInit, size, newone2);
+        CardsMove();
+        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[3]);
+        handcards.Add(newone3);
+        BuildShowedcard(positionInit, size, newone3);
+        CardsMove();
     }
     private void GetInitCards()
     {
@@ -128,26 +139,29 @@ public class playerbout : MonoBehaviour
         thisone.controller = controller;
         thisone.card = card;
         thisone.showedcard = square;
+        thisone.player = gameObject;
 
         square.AddComponent<SelectObl>();
-        square.AddComponent<Rigidbody>();
         Attack a=square.AddComponent<Attack>();
         a.enabled = false;
         Shake s=square.AddComponent<Shake>();
         s.enabled = false;
         DelEvent d=square.AddComponent<DelEvent>();
         d.enabled = false;
+        square.AddComponent<MoveE>().enabled = false;
         showedCards.Add(square);
     }
     public void CardsMove()
     {
         int num = handcards.Count;
-        float setx = 60 - 120 * (num / 2);
+        float setx = 60 - 60 * num;
         for(int i=0;i<num;i++)
         {
-            Vector2 position = new Vector2(setx, -80);
-            Transform t = showedCards[i].GetComponent<Transform>();
-            t.position = Vector3.MoveTowards(t.position, position, 5.0f * Time.deltaTime);
+            Vector3 position = new Vector3(setx, -80, 0);
+            MoveE e= showedCards[i].GetComponent<MoveE>();
+            e.position = position;
+            e.enabled = true;
+            setx += 120;
         }
     }
     private void InitTarget()

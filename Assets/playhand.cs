@@ -56,6 +56,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         if (!allowDragging|| !con.isplayerbout) return;
         // 可以在这里添加拖拽开始时的逻辑
+        originalPosition = rectTransform.anchoredPosition;
     }
 
     // 拖拽过程中
@@ -89,13 +90,11 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     }
     private void SetPlayedcards()
     {
-        gamecontroller con= controller.GetComponent<gamecontroller>();
-        //con.playercards[idoftarget - 1] = card;
         playerbout pla = player.GetComponent<playerbout>();
         Attack a = showedcard.GetComponent<Attack>();
-        a.target = con.firstv[idoftarget];
-        a.target1 = con.showedpla[idoftarget];
+        a.targetPosition = con.firstv[idoftarget];
         pla.handcards.Remove(card);
+        con.playercards[idoftarget] = card;
         con.showedpla[idoftarget] = showedcard;
         pla.showedCards.Remove(showedcard);
         pla.CardsMove();
@@ -104,12 +103,28 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private bool MeetCon()
     {
         int num = 0;
-        for(int i=0;i<4;i++)
+        for (int i = 0; i < 4; i++)
         {
             if (con.isUsed[i] == true)
                 num++;
         }
-        return num >= card.sacrifice;
+        bool a = num >= card.sacrifice;
+        if (a)
+        {
+            int n = 0;
+            for (int i = 0; n < card.sacrifice; i++)
+            {
+                if (con.isUsed[i] == true)
+                {
+                    con.isUsed[i] = false;
+                    con.playercards[i] = null;
+                    Destroy(con.showedpla[i]);
+                    con.showedpla[i] = null;
+                    n++;
+                }
+            }
+        }
+        return a;
     }
 
     private void DelUsedcards()
@@ -136,7 +151,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             DelUsedcards();
             // 成功放到目标区域
             SnapToTarget();
-            //SetPlayedcards();
+            SetPlayedcards();
             Debug.Log("成功放到目标位置!");
             allowDragging = false;
             isPlaced = true;
@@ -159,7 +174,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             if (distance1 <= snapDistance)
             {
                 isInTargetArea = true;
-                idoftarget = 1;
+                idoftarget = 0;
             }
         }
         if (con.isEmpty[1])
@@ -168,7 +183,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             if (distance2 <= snapDistance)
             {
                 isInTargetArea = true;
-                idoftarget = 2;
+                idoftarget = 1;
             }
 
         }
@@ -178,7 +193,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             if (distance3 <= snapDistance)
             {
                 isInTargetArea = true;
-                idoftarget = 3;
+                idoftarget = 2;
             }
 
         }
@@ -188,7 +203,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             if (distance4 <= snapDistance)
             {
                 isInTargetArea = true;
-                idoftarget = 4;
+                idoftarget = 3;
             }
 
         }
@@ -204,19 +219,19 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         switch (idoftarget)
         {
-            case 1:
+            case 0:
                 rectTransform.anchoredPosition = targetArea1.anchoredPosition;
                 con.isEmpty[0] = false;
                 break;
-            case 2:
+            case 1:
                 rectTransform.anchoredPosition = targetArea2.anchoredPosition;
                 con.isEmpty[1] = false;
                 break;
-            case 3:
+            case 2:
                 rectTransform.anchoredPosition = targetArea3.anchoredPosition;
                 con.isEmpty[2] = false;
                 break;
-            case 4:
+            case 3:
                 rectTransform.anchoredPosition = targetArea4.anchoredPosition;
                 con.isEmpty[3] = false;
                 break;

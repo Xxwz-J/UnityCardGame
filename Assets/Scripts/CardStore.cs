@@ -8,7 +8,7 @@ public class CardStore : MonoBehaviour
     public TextAsset cardData;
     public List<Card> cards = new List<Card>();
 
-
+    public int num = 0;
 
 
     // Start is called before the first frame update
@@ -44,7 +44,8 @@ public class CardStore : MonoBehaviour
                 MonsterCard monsterCard = new MonsterCard(id,name, attack, health, sacrifice,stamp);
                 cards.Add(monsterCard);
 
-                //Debug.Log("∂¡»°µΩπ÷ ﬁø®:"+monsterCard .cardName);
+                Debug.Log("∂¡»°µΩπ÷ ﬁø®:"+monsterCard .cardName);
+                num++;
             }
         }
     }
