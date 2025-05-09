@@ -8,13 +8,18 @@ using UnityEngine.UIElements;
 public class gamecontroller : MonoBehaviour
 {
     public GameObject module;
+    public GameObject whiteBlock;
     public bool isplayerbout; //是否是玩家回合
     public MonsterCard[] playercards = new MonsterCard[4];
     public GameObject[] showedpla = new GameObject[4];
-    public MonsterCard[] allEnemy=new MonsterCard[20]; //敌人出现顺序
+    public MonsterCard[] allEnemy=new MonsterCard[20]; //普通敌人出现顺序
+    public MonsterCard[] anotherEnemy = new MonsterCard[20];//boss战第二回合敌人
     public bool[] isEmpty; //玩家方是否有出战牌
     public bool[] isUsed;//是否被选择献祭
     public Camera uiCamera;
+    public int life;//玩家剩余生命次数
+    public bool isboss;//是否是boss战
+    private bool isActive;//boss战是否进入第二回合
     private int numofRound = 0;//回合数
     public MonsterCard[] firstlinecards;//第一排敌人
     public GameObject[] firshowed;
@@ -41,6 +46,7 @@ public class gamecontroller : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        whiteBlock.SetActive(false);
         uiCamera.transform.position = v1;
         isplayerbout = true;
         begin = false;
@@ -77,6 +83,7 @@ public class gamecontroller : MonoBehaviour
         secondv[1] = new Vector2(-118, 83);
         secondv[2] = new Vector2(32, 83);
         secondv[3] = new Vector2(182, 83);
+        if (isboss) life = 1;
         data = GetComponent<CardStore>();
         //InitEnemy();
     }
@@ -166,7 +173,12 @@ public class gamecontroller : MonoBehaviour
         int result = damageEnemyReceived - damagePlayerReceived;
         gameOver = result > 5 || result < -5;
         if (gameOver)
-            GameOver(result > 5);
+            if(!isboss||isActive)
+                GameOver(true);
+            else
+            {
+                ReBegin();
+            }
         else begin = true;
     }
     //更换游戏视角
@@ -195,7 +207,7 @@ public class gamecontroller : MonoBehaviour
         int result = damageEnemyReceived - damagePlayerReceived;
         gameOver = result > 5 || result < -5;
         if (gameOver)
-            GameOver(result > 5);
+            GameOver(false);
         else
         {
             ready = true;
@@ -266,11 +278,18 @@ public class gamecontroller : MonoBehaviour
     {
         if(playerWin)
         {
-            //胜利结果
+            GetComponent<SceneChange1>().LoadSceneWithWhiteFade("AwardScene");
         }
         else
         {
-            //战败play
+            if(life==2)
+            {
+                life--;
+            }
+            else
+            {
+                GetComponent<SceneChange1>().LoadSceneWithWhiteFade("FailedScene");
+            }
         }
     }
     //我方卡牌激活刻印
@@ -305,37 +324,36 @@ public class gamecontroller : MonoBehaviour
                     break;
             }
         }
-        if(isFur)
+        if (isFur)
         {
-            if(isFlying)
+            Attack a = showedpla[id].GetComponent<Attack>();
+            if(id>0&&id<3)
             {
-                damageEnemyReceived += playercards[id].attack * 2;
+                a.isFur = true;
+                a.targetPosition = firstv[id - 1];
+                a.targetPosition1 = firstv[id + 1];
             }
-            else if(isPio)
+            if (id > 0)
             {
-                if (id > 0)
+                if (isFlying) damageEnemyReceived += playercards[id].attack;
+                else if (isPio)
                 {
                     if (firstlinecards[id - 1] != null)
                         firstlinecards[id - 1].health = 0;
                     else damageEnemyReceived += playercards[id].attack;
                 }
-                if (id < 3)
+                else AttackFront1(playercards[id], id - 1);
+            }
+            if (id < 3)
+            {
+                if (isFlying) damageEnemyReceived += playercards[id].attack;
+                else if (isPio)
                 {
                     if (firstlinecards[id + 1] != null)
                         firstlinecards[id + 1].health = 0;
                     else damageEnemyReceived += playercards[id].attack;
                 }
-            }
-            else
-            {
-                if (id>0)
-                {
-                    AttackFront1(playercards[id], id - 1);
-                }
-                if(id<3)
-                {
-                    AttackFront1(playercards[id], id + 1);
-                }
+                else AttackFront1(playercards[id], id + 1);
             }
         }
         else
@@ -392,37 +410,47 @@ public class gamecontroller : MonoBehaviour
                     break;
             }
         }
+        Attack a = firshowed[id].GetComponent<Attack>();
         if (isFur)
         {
-            if (isFlying)
+            if(id>0&&id<3)
             {
-                damagePlayerReceived += firstlinecards[id].attack * 2;
+                a.isFur = true;
+                a.targetPosition = positionpla[id - 1];
+                a.targetPosition1 = positionpla[id + 1];
             }
-            else if (isPio)
+            else
             {
-                if (id > 0)
+                a.isFur = false;
+                a.targetPosition = positionpla[id];
+            }
+            if (id > 0)
+            {
+                if (isFlying)
+                {
+                    damagePlayerReceived += firstlinecards[id].attack;
+                }
+                else if (isPio)
                 {
                     if (playercards[id - 1] != null)
                         playercards[id - 1].health = 0;
                     else damagePlayerReceived += firstlinecards[id].attack;
                 }
-                if (id < 3)
+                else AttackFront2(firstlinecards[id], id - 1);
+            }
+            if (id < 3)
+            {
+                if (isFlying)
+                {
+                    damagePlayerReceived += firstlinecards[id].attack;
+                }
+                if (isPio)
                 {
                     if (playercards[id + 1] != null)
                         playercards[id + 1].health = 0;
                     else damagePlayerReceived += firstlinecards[id].attack;
                 }
-            }
-            else
-            {
-                if (id > 0)
-                {
-                    AttackFront2(firstlinecards[id], id - 1);
-                }
-                if (id < 3)
-                {
-                    AttackFront2(firstlinecards[id], id + 1);
-                }
+                else AttackFront2(firstlinecards[id], id + 1);
             }
         }
         else
@@ -450,16 +478,18 @@ public class gamecontroller : MonoBehaviour
     //我方卡牌攻击前方敌人
     private void AttackFront1(MonsterCard card,int id)
     {
-        if (firstlinecards[id] == null)
-            if(idofDe2==-1)
-                damageEnemyReceived += card.attack;
+        if (card.attack != 0)
+        {
+            if (firstlinecards[id] == null)
+                if (idofDe2 == -1)
+                    damageEnemyReceived += card.attack;
+                else
+                {
+                    firstlinecards[id] = firstlinecards[idofDe2];
+                    idofDe2 = id;
+                    AttackFront1(card, id);
+                }
             else
-            {
-                firstlinecards[id] = firstlinecards[idofDe2];
-                idofDe2 = id;
-                AttackFront1(card, id);
-            }
-        else
             {
                 if (card.attack > firstlinecards[id].health)
                 {
@@ -470,21 +500,24 @@ public class gamecontroller : MonoBehaviour
                 }
                 else firstlinecards[id].health -= card.attack;
             }
-        CleanCard();
+            CleanCard();
+        }
     }
     //敌方卡牌攻击前方
     private void AttackFront2(MonsterCard card, int id)
     {
-        if (playercards[id] == null || playercards[id].health==0)
-            if(idofDe1==-1)
-                damagePlayerReceived += card.attack;
+        if (card.attack != 0)
+        {
+            if (playercards[id] == null || playercards[id].health == 0)
+                if (idofDe1 == -1)
+                    damagePlayerReceived += card.attack;
+                else
+                {
+                    playercards[id] = playercards[idofDe1];
+                    idofDe1 = id;
+                    AttackFront2(card, id);
+                }
             else
-            {
-                playercards[id] = playercards[idofDe1];
-                idofDe1 = id;
-                AttackFront2(card, id);
-            }
-        else
             {
                 if (card.attack > playercards[id].health)
                 {
@@ -492,7 +525,8 @@ public class gamecontroller : MonoBehaviour
                 }
                 else playercards[id].health -= card.attack;
             }
-        CleanCard();
+            CleanCard();
+        }
     }
     //清除血量为0的卡牌
     private void CleanCard()
@@ -608,8 +642,9 @@ public class gamecontroller : MonoBehaviour
                 }
                 if (playercards[i] != null)
                 {
-                    showedpla[i].GetComponent<Attack>().enabled = true;
                     Stamps1(i);
+                    if (playercards[i].attack != 0)
+                        showedpla[i].GetComponent<Attack>().enabled = true;
                 }
             }
         }
@@ -624,10 +659,41 @@ public class gamecontroller : MonoBehaviour
                 }
                 if (firstlinecards[i] != null)
                 {
-                    firshowed[i].GetComponent<Attack>().enabled = true;
                     Stamps2(i);
+                    if (firstlinecards[i].attack != 0)
+                        firshowed[i].GetComponent<Attack>().enabled = true;
                 }
             }
         }
+    }
+
+    private void ReBegin()
+    {
+        isActive = true;
+        damageEnemyReceived = 0;
+        damagePlayerReceived = 0;
+        numofRound = 0;
+        allEnemy = anotherEnemy;
+        for(int i=0;i<4;i++)
+        {
+            if (playercards[i]!=null)
+            {
+                playercards[i] = (MonsterCard)GetComponent<CardStore>().cards[15];
+                showedpla[i].GetComponent<CardDisplay>().card = playercards[i];
+            }
+            firstlinecards[i] = null;
+            firshowed[i] = null;
+            secondlinecards[i] = null;
+            secshowed[i] = null;
+            firstline = new Queue<MonsterCard>();
+            secondline = new Queue<MonsterCard>();
+            thirdline = new Queue<MonsterCard>();
+            fourthline = new Queue<MonsterCard>();
+        }
+        firstlinecards[0]= (MonsterCard)GetComponent<CardStore>().cards[16];
+        Buildcard(1, firstlinecards[0], 0);
+        isplayerbout = true;
+        begin = false;
+        ready = false;
     }
 }

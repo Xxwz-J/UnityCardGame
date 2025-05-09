@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DelEvent : MonoBehaviour
 {
-    public float duration = 1.0f; // 消失持续时间
+    public float duration = 2.0f; // 消失持续时间
     private SpriteRenderer spriteRenderer; // SpriteRenderer 引用
 
     void Start()

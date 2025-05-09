@@ -92,6 +92,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         playerbout pla = player.GetComponent<playerbout>();
         Attack a = showedcard.GetComponent<Attack>();
+        a.isFur = false;
         a.targetPosition = con.firstv[idoftarget];
         pla.handcards.Remove(card);
         con.playercards[idoftarget] = card;
@@ -118,7 +119,8 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
                 {
                     con.isUsed[i] = false;
                     con.playercards[i] = null;
-                    Destroy(con.showedpla[i]);
+                    DelEvent d = con.showedpla[i].GetComponent<DelEvent>();
+                    d.enabled = true;
                     con.showedpla[i] = null;
                     n++;
                 }

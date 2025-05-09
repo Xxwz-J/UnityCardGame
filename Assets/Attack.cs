@@ -7,12 +7,15 @@ using UnityEngine.UI;
 public class Attack : MonoBehaviour
 {
     public Vector2 targetPosition; // 目标位置（使用 Vector2）
+    public Vector2 targetPosition1;
     public float speed = 500.0f; // 移动速度
     public float returnSpeed = 500.0f; // 返回速度
     public float collisionDistance = 1.0f; // 撞击距离
+    public bool isFur;//是否有两个目标
 
     private Vector2 startPosition; // 起始位置（使用 Vector2）
     public bool isReturning = false; // 是否正在返回
+    private bool sec = false;
 
     void Start()
     {
@@ -37,7 +40,13 @@ public class Attack : MonoBehaviour
         {
             // 返回起始位置
             transform.position = Vector2.MoveTowards(transform.position, startPosition, returnSpeed * Time.deltaTime);
-            if (transform.position.y == startPosition.y)
+            if (transform.position.y == startPosition.y && isFur && !sec)
+            {
+                sec = true;
+                targetPosition = targetPosition1;
+                isReturning = false;
+            }
+            else if (transform.position.y == startPosition.y)
                 enabled = false;
         }
     }
