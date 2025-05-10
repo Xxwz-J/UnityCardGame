@@ -28,6 +28,5 @@ public class ChooseCard : MonoBehaviour, IPointerDownHandler
         {
             warmCard.choosing(gameObject);
         }
-        
     }
 }

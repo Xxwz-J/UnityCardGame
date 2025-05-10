@@ -5,6 +5,7 @@ using System.IO;
 using Unity.Collections.LowLevel.Unsafe;
 using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using UnityEngine.UIElements;
+using UnityEngine.UI;
 
 public class CardMix : MonoBehaviour
 {
@@ -16,9 +17,10 @@ public class CardMix : MonoBehaviour
     public GameObject mixcard2;
     public GameObject card1;
     public GameObject card2;
+    public GameObject pushbutton;
     public GameObject cardPrefab;
     public PlayerData playerData;
-    public LinkedList<GameObject>[] mixableCardList;
+    public LinkedList<GameObject> mixableCardList=new LinkedList<GameObject>();
     bool havesame=false;
     bool abletochoose = false;
     bool pool1=false;
@@ -29,6 +31,7 @@ public class CardMix : MonoBehaviour
     void Start()
     {
         LayoutPlayerCards();
+        setUi();
     }
 
     // Update is called once per frame
@@ -38,11 +41,9 @@ public class CardMix : MonoBehaviour
     }
     public void LayoutPlayerCards()           //展示玩家卡组
     {
-        mixableCardList = new LinkedList<GameObject>[playerData.playerCards.Length];
         int i = 0;
         foreach (var Samenamecard in playerData.playerCards)
         {
-            LinkedList<GameObject> list = new LinkedList<GameObject>();
             bool mixable = (Samenamecard.Count > 1);
             foreach (Card card in Samenamecard)                 //全部展示，但只有可融合的为可见
             {
@@ -50,16 +51,15 @@ public class CardMix : MonoBehaviour
                 newcard.GetComponent<CardDisplay>().card = card;
                 newcard.SetActive(mixable);
                 newcard.AddComponent<choosemix>().cardMix = this;
-                list.AddLast(newcard);
+                if(mixable)mixableCardList.AddLast(newcard);
             }
             if(mixable)
             {
-                mixableCardList[i] = list;
                 havesame = true;
             }
             i++;
         }
-        if(!havesame)
+        if(!havesame)                     //此处应跳转到cardstore界面允许抽取一张已有类型的复制卡
         {
             Debug.Log("你的卡组没有可以给菌学家融合的卡片");
         }
@@ -67,15 +67,40 @@ public class CardMix : MonoBehaviour
     public void choosing(GameObject gameObject)     //选择想要强化的卡
     {
         if (abletochoose) return;
-        if(!pool1)                           //左侧融合池(即融合池1)为空
+        if(gameObject.GetComponentInParent<GridLayoutGroup>().gameObject==mixpool1)
+        {
+            mixcard1.SetActive(true);
+            Destroy(gameObject);
+            mixcard1 = null;
+            card1 = null;
+            pool1 = false;
+            showmixablecard();
+            setUi();
+            return;
+        }
+        if (gameObject.GetComponentInParent<GridLayoutGroup>().gameObject == mixpool2)
+        {
+            mixcard2.SetActive(true);
+            Destroy(gameObject);
+            mixcard2 = null;
+            card2 = null;
+            pool2 = false;
+            showmixablecard();
+            setUi();
+            return;
+        }
+        if (!pool1)                           //左侧融合池(即融合池1)为空
         {
             gameObject.SetActive(false);
             GameObject temp= GameObject.Instantiate(cardPrefab,mixpool1.transform);
             temp.GetComponent<CardDisplay>().card = gameObject.GetComponent<CardDisplay>().card;
-            preid=gameObject.GetComponent<CardDisplay>().card.cardID;
+            temp.AddComponent<choosemix>().cardMix = this;
+            preid =gameObject.GetComponent<CardDisplay>().card.cardID;
             pool1 = true;
             mixcard1 = gameObject;
             card1 = temp;
+            hidediffrent();
+            setUi();
             return;
         }
         else if(!pool2)                      //右侧融合池(即融合池2)为空
@@ -84,9 +109,11 @@ public class CardMix : MonoBehaviour
             gameObject.SetActive(false);
             GameObject temp = GameObject.Instantiate(cardPrefab, mixpool2.transform);
             temp.GetComponent<CardDisplay>().card = gameObject.GetComponent<CardDisplay>().card;
+            temp.AddComponent<choosemix>().cardMix = this;
             pool2 = true;
             mixcard2 = gameObject;
             card2 = temp;
+            setUi();
             return;
         }
         return;
@@ -95,7 +122,6 @@ public class CardMix : MonoBehaviour
     public void cutandmix()
     {
         if(!pool1 || !pool2) return;
-        Debug.Log("0");
         if (done) return;
         card1.SetActive(false);
         card2.SetActive(false);
@@ -121,6 +147,7 @@ public class CardMix : MonoBehaviour
         }
         MonsterCard mixedcard = new MonsterCard(preid, temp1.cardName, temp1.attack + temp2.attack,
             temp1.healthmax + temp2.healthmax, temp1.sacrifice, total);
+        if (mixedcard.stamps[1] != Stamp.NullStamp) mixedcard.carved = true;
         GameObject newcard=GameObject.Instantiate(cardPrefab,mixedpool.transform);
         newcard.GetComponent<CardDisplay>().card = mixedcard;
         GameObject getnewcard = GameObject.Instantiate(cardPrefab, cardpool.transform);
@@ -131,7 +158,7 @@ public class CardMix : MonoBehaviour
         doneIt();
     }
 
-    public void doneIt()                        //卡被吃掉或者玩家主动结束强化，锁死融合按钮
+    public void doneIt()                        //锁死融合按钮
     {
         done = true;
         string path = Application.dataPath + "/Datas/playerdata.csv";
@@ -140,10 +167,41 @@ public class CardMix : MonoBehaviour
         {
             if (child.gameObject == null) continue;
             var monster = child.GetComponent<CardDisplay>().card as MonsterCard;
+            //Debug.Log(monster.carved);
             datas.Add("card," + monster.cardID.ToString() + "," + monster.attack.ToString() + "," +
                 monster.healthmax.ToString() + "," + monster.stamps[0].ToString() + "," +
-                monster.stamps[1].ToString() + "," + monster.stamps[2].ToString() + ",FALSE");
+                monster.stamps[1].ToString() + "," + monster.stamps[2].ToString() + "," + monster.carved);
         }
         File.WriteAllLines(path, datas);
+    }
+
+    public void hidediffrent()              //若融合区有卡，隐藏卡组中所有不同的卡
+    {
+        foreach (Transform child in cardpool.transform)
+        {
+            if(child.GetComponent<CardDisplay>().card.cardID != preid) 
+                child.gameObject.SetActive(false);
+        }
+    }
+
+    public void showmixablecard()
+    {
+        if (pool1 || pool2 == true) return;
+        foreach (var hidcard in mixableCardList)
+        {
+            hidcard.SetActive(true);
+        }
+    }
+
+    public void setUi()
+    {
+        if(pool1&&pool2)pushbutton.SetActive(true);
+        else pushbutton.SetActive(false);
+        if(done)
+        {
+            mixpool1.SetActive(false);
+            mixpool2.SetActive(false);
+            mixedpool.SetActive(true);
+        }
     }
 }

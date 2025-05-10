@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 using Unity.Collections.LowLevel.Unsafe;
+using UnityEngine.UI;
 
 public class WarmCard : MonoBehaviour
 {
@@ -49,7 +50,14 @@ public class WarmCard : MonoBehaviour
     public void choosing(GameObject gameObject)     //选择想要强化的卡
     {
         if (abletochoose) return;
-        if(chosenCard!=null)
+        if (gameObject.GetComponentInParent<GridLayoutGroup>().gameObject == onFire)
+        {
+            chosenCard.SetActive(true);
+            Destroy(onfirecard);
+            onfirecard = null;
+            return;
+        }
+        if (chosenCard!=null)
         {
             chosenCard.SetActive(true);
         }
@@ -62,6 +70,7 @@ public class WarmCard : MonoBehaviour
         }
         GameObject temp = GameObject.Instantiate(cardPrefab, onFire.transform);
         onfirecard = temp;
+        onfirecard.AddComponent<ChooseCard>().warmCard = this;
         temp.GetComponent<CardDisplay>().card = chosenCard.GetComponent<CardDisplay>().card;
     }
 
@@ -76,10 +85,10 @@ public class WarmCard : MonoBehaviour
             var monster = child.GetComponent<CardDisplay>().card as MonsterCard;
             datas.Add("card," + monster.cardID.ToString() + "," + monster.attack.ToString() + "," +
                 monster.healthmax.ToString() + "," + monster.stamps[0].ToString() + "," +
-                monster.stamps[1].ToString() + "," + monster.stamps[2].ToString()+",FALSE");
+                monster.stamps[1].ToString() + "," + monster.stamps[2].ToString() + "," + monster.carved);
         }
         File.WriteAllLines(path, datas);
-    }                 
+    }
 
     public void roastCard()                  //第一次强化必定成功，第二次百分之五十，第三次卡必定被吃掉
     {
@@ -115,9 +124,10 @@ public class WarmCard : MonoBehaviour
             monster.attack+=1;
             //Debug.Log(monster.cardName + monster.attack.ToString() + monster.healthmax.ToString());
             onfirecard.GetComponent<CardDisplay>().card = monster;
-            //Destroy(onfirecard);                           //以下三行更新强化卡面，未测试
-            //GameObject temp = GameObject.Instantiate(cardPrefab, onFire.transform);
-            //temp.GetComponent<CardDisplay>().card = monster;
+            Destroy(onfirecard);                           //以下三行更新强化卡面，未测试
+            GameObject temp = GameObject.Instantiate(cardPrefab, onFire.transform);
+            temp.GetComponent<CardDisplay>().card = monster;
+            onfirecard = temp;
             chosenCard.GetComponent<CardDisplay>().card= monster;
         }
     }

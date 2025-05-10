@@ -25,7 +25,6 @@ public class PlayerData : MonoBehaviour
     }
 
     public void LoadPlayerData() {
-
         string[] dataRow = playerData.text.Split("\n");
         //playerCards = new int[CardStore.cards .Count];
         playerCards = new LinkedList<Card>[CardStore.cards.Count];
