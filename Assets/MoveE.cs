@@ -15,7 +15,7 @@ public class MoveE : MonoBehaviour
         rectTransform.anchoredPosition = Vector2.MoveTowards(
             rectTransform.anchoredPosition,
             position,
-            500.0f * Time.deltaTime);
+            800.0f * Time.deltaTime);
         if (rectTransform.anchoredPosition.x==  position.x)
             enabled = false;
     }

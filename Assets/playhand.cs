@@ -15,7 +15,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     public GameObject TargetArea4; // 目标区域1
     public MonsterCard card;
     public GameObject showedcard;
-    public Canvas controller;
+    public GameObject controller;
     public GameObject player;
     public float snapDistance = 50f; // 吸附距离(像素)
     public bool isPlaced = false;
@@ -93,12 +93,18 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         playerbout pla = player.GetComponent<playerbout>();
         Attack a = showedcard.GetComponent<Attack>();
         a.isFur = false;
-        a.targetPosition = con.firstv[idoftarget];
+        a.id = idoftarget;
+        a.ispla = true;
+        a.targetPosition1 = con.firstv[idoftarget];
         pla.handcards.Remove(card);
         con.playercards[idoftarget] = card;
         con.showedpla[idoftarget] = showedcard;
         pla.showedCards.Remove(showedcard);
         pla.CardsMove();
+        if (con.idofThi != -1 && con.firstlinecards[idoftarget] == null)
+        {
+            con.ThiMove(idoftarget);
+        }
     }
 
     private bool MeetCon()
@@ -109,7 +115,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             if (con.isUsed[i] == true)
                 num++;
         }
-        bool a = num >= card.sacrifice;
+        bool a = (num >= card.sacrifice);
         if (a)
         {
             int n = 0;
@@ -122,24 +128,12 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
                     DelEvent d = con.showedpla[i].GetComponent<DelEvent>();
                     d.enabled = true;
                     con.showedpla[i] = null;
+                    con.isEmpty[i] = true;
                     n++;
                 }
             }
         }
         return a;
-    }
-
-    private void DelUsedcards()
-    {
-        int num = card.sacrifice;
-        for(int i=0;i<4;i++)
-        {
-            if (con.isUsed[i] && num > 0)
-            {
-                con.playercards[i] = null;
-                num--;
-            }
-        }
     }
     // 结束拖拽
     public void OnEndDrag(PointerEventData eventData)
@@ -150,7 +144,6 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         CheckIfInTargetArea();
         if (isInTargetArea && MeetCon())
         {
-            DelUsedcards();
             // 成功放到目标区域
             SnapToTarget();
             SetPlayedcards();
@@ -177,6 +170,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             {
                 isInTargetArea = true;
                 idoftarget = 0;
+                return;
             }
         }
         if (con.isEmpty[1])
@@ -186,8 +180,8 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             {
                 isInTargetArea = true;
                 idoftarget = 1;
+                return;
             }
-
         }
         if (con.isEmpty[2])
         {
@@ -196,8 +190,8 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             {
                 isInTargetArea = true;
                 idoftarget = 2;
+                return;
             }
-
         }
         if (con.isEmpty[3])
         {
@@ -206,8 +200,8 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             {
                 isInTargetArea = true;
                 idoftarget = 3;
+                return;
             }
-
         }
         else
         {

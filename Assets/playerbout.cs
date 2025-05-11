@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 
 public class playerbout : MonoBehaviour
 {
-    public Canvas controller;
+    public GameObject controller;
     public GameObject button;
     public GameObject newCard;//¿¨ÅÆµÄÔ¤ÖÆÌå
     public MonsterCard[] cards=new MonsterCard[4]; //ÅÆ¶Ñ
@@ -53,15 +53,15 @@ public class playerbout : MonoBehaviour
         handcards.Add(newone);
         BuildShowedcard(positionInit, size, newone);
         CardsMove();
-        MonsterCard newone1 = new MonsterCard((MonsterCard)allCards.cards[5]);
+        MonsterCard newone1 = new MonsterCard((MonsterCard)allCards.cards[13]);
         handcards.Add(newone1);
         BuildShowedcard(positionInit, size, newone1);
         CardsMove();
-        MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[1]);
+        MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[10]);
         handcards.Add(newone2);
         BuildShowedcard(positionInit, size, newone2);
         CardsMove();
-        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[3]);
+        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[2]);
         handcards.Add(newone3);
         BuildShowedcard(positionInit, size, newone3);
         CardsMove();
@@ -144,9 +144,11 @@ public class playerbout : MonoBehaviour
         square.AddComponent<SelectObl>();
         Attack a=square.AddComponent<Attack>();
         a.enabled = false;
+        a.contorller = controller;
         Shake s=square.AddComponent<Shake>();
         s.enabled = false;
         DelEvent d=square.AddComponent<DelEvent>();
+        d.controller = controller;
         d.enabled = false;
         square.AddComponent<MoveE>().enabled = false;
         showedCards.Add(square);
@@ -249,5 +251,29 @@ public class playerbout : MonoBehaviour
             ready = true;
             selected = false;
         }
+    }
+
+    public void GetAward()
+    {
+        MonsterCard newone = GetBasicCard();
+        handcards.Add(newone);
+        BuildShowedcard(positionInit, size, newone);
+        CardsMove();
+        MonsterCard newone1 = GetBasicCard();
+        handcards.Add(newone);
+        BuildShowedcard(positionInit, size, newone);
+        CardsMove();
+        MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[13]);
+        handcards.Add(newone1);
+        BuildShowedcard(positionInit, size, newone1);
+        CardsMove();
+        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[10]);
+        handcards.Add(newone2);
+        BuildShowedcard(positionInit, size, newone2);
+        CardsMove();
+        MonsterCard newone4 = new MonsterCard((MonsterCard)allCards.cards[2]);
+        handcards.Add(newone3);
+        BuildShowedcard(positionInit, size, newone3);
+        CardsMove();
     }
 }
