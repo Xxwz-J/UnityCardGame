@@ -25,7 +25,6 @@ public class DelEvent : MonoBehaviour
     {
         float elapsedTime = 0f;
         Color color = spriteRenderer.color;
-        Debug.Log(color);
 
         while (elapsedTime < duration)
         {
@@ -36,7 +35,6 @@ public class DelEvent : MonoBehaviour
             elapsedTime += Time.deltaTime; // 累计时间
             yield return null; // 等待下一帧
         }
-        Debug.Log("222222");
         // 动画完成后，销毁对象
         Destroy(gameObject);
         con.enabled = true;

@@ -54,7 +54,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // 开始拖拽
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (!allowDragging|| !con.isplayerbout) return;
+        if (!allowDragging|| !player.GetComponent<playerbout>().selected) return;
         // 可以在这里添加拖拽开始时的逻辑
         originalPosition = rectTransform.anchoredPosition;
     }
@@ -62,7 +62,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // 拖拽过程中
     public void OnDrag(PointerEventData eventData)
     {
-        if (!allowDragging || !con.isplayerbout) return;
+        if (!allowDragging || !player.GetComponent<playerbout>().selected) return;
         // 将屏幕坐标转换为Canvas局部坐标
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             rectTransform.parent as RectTransform,
@@ -138,7 +138,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     // 结束拖拽
     public void OnEndDrag(PointerEventData eventData)
     {
-        if (!allowDragging || !con.isplayerbout) return;
+        if (!allowDragging || !player.GetComponent<playerbout>().selected) return;
 
         // 检查是否在目标区域内
         CheckIfInTargetArea();

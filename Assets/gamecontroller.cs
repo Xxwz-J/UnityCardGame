@@ -1,12 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Unity.Collections.LowLevel.Unsafe;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class gamecontroller : MonoBehaviour
 {
+    public GameObject text;
     public GameObject module;
     public GameObject whiteBlock;
     public GameObject panel1;
@@ -14,13 +15,13 @@ public class gamecontroller : MonoBehaviour
     public bool isplayerbout; //是否是玩家回合
     public MonsterCard[] playercards = new MonsterCard[4];
     public GameObject[] showedpla = new GameObject[4];
-    public MonsterCard[] allEnemy=new MonsterCard[20]; //普通敌人出现顺序
-    public MonsterCard[] anotherEnemy = new MonsterCard[20];//boss战第二回合敌人
+    public MonsterCard[] allEnemy=new MonsterCard[20]; //普通敌人出现顺序   -----------
+    public MonsterCard[] anotherEnemy = new MonsterCard[20];//boss战第二回合敌人    -----------
     public bool[] isEmpty; //玩家方是否有出战牌
     public bool[] isUsed;//是否被选择献祭
     public Camera uiCamera;
-    public int life;//玩家剩余生命次数
-    public bool isboss;//是否是boss战
+    public int life;//玩家剩余生命次数   ---------------
+    public bool isboss;//是否是boss战  ----------------
     private bool isActive;//boss战是否进入第二回合
     private int numofRound = 0;//回合数
     public MonsterCard[] firstlinecards;//第一排敌人
@@ -35,8 +36,7 @@ public class gamecontroller : MonoBehaviour
     private bool ready;//敌方是否攻击
     private int idofDe1; //玩家方阻挡印记拥有者id
     private int idofDe2; //敌方阻挡印记拥有者id
-    //public int idofThi = 1;
-    public int idofThi = 0;
+    public int idofThi;
     private int damagePlayerReceived;
     private int damageEnemyReceived;
     private bool gameOver;
@@ -50,9 +50,13 @@ public class gamecontroller : MonoBehaviour
     private int ind = 0;
     private bool[] isGro1 = new bool[4];
     private bool[] isGro2 = new bool[4];
+    public bool re;
+    public bool reend = false;
+    private bool inited = false;
     // Start is called before the first frame update
     void Start()
     {
+        text.SetActive(false);
         whiteBlock.SetActive(false);
         uiCamera.transform.position = v1;
         isplayerbout = true;
@@ -60,6 +64,7 @@ public class gamecontroller : MonoBehaviour
         ready = false;
         idofDe1 = -1;
         idofDe2 = -1;
+        idofThi = -1;
         isEmpty = new bool[4];
         isUsed = new bool[4];
         firstlinecards = new MonsterCard[4];
@@ -90,26 +95,36 @@ public class gamecontroller : MonoBehaviour
         secondv[1] = new Vector2(-118, 83);
         secondv[2] = new Vector2(32, 83);
         secondv[3] = new Vector2(182, 83);
-        if (isboss) life = 1;
+        if (isboss)
+        {
+            if(life==2)
+            {
+                ShowText(0);
+                life = 1;
+            }
+        }
         data = GetComponent<CardStore>();
-        InitEnemy1();
+        re = false;
     }
     // Update is called once per frame
     void Update()
     {
-        if (ind == 4)
+        if (ind >= 4)
         {
             int result = damageEnemyReceived - damagePlayerReceived;
+            Debug.Log("result:" + result);
             gameOver = result > 5 || result < -5;
             if (gameOver)
             {
+                Debug.Log("Over");
                 if (!begin)
                 {
                     if (!isboss || isActive)
                         GameOver(result > 5);
                     else
                     {
-                        ReBegin();
+                        ReBegin1();
+                        ind = 0;
                     }
                 }
                 else
@@ -117,6 +132,7 @@ public class gamecontroller : MonoBehaviour
             }
             else
             {
+                Debug.Log("continue");
                 if (!begin)
                 {
                     begin = true;
@@ -140,21 +156,39 @@ public class gamecontroller : MonoBehaviour
                 ChangeCam(0);
             }
         }
-        if (isplayerbout == false && begin == false)
+        if (inited)
         {
-            PlayerAttack();
+            if (isplayerbout == false && begin == false)
+            {
+                ChangeCam(1);
+                PlayerAttack();
+            }
+            else if (!isplayerbout && !ready && !re)
+            {
+                if (firstlinecards[ind] == null)
+                {
+                    CardMove(ind);
+                }
+                else if (reend) CardMove(-1);
+                else CardMove(-2);
+            }
+            else if (isplayerbout == false && ready == false)
+            {
+                EnemyAttack();
+                re = false;
+                reend = false;
+            }
+            else if (!isplayerbout)
+            {
+                AllGro();
+                isplayerbout = true;
+                begin = false;
+                ready = false;
+                inited = false;
+            }
         }
-        else if (isplayerbout == false && ready == false)
-        {
-            EnemyAttack();
-        }
-        else
-        {
-            AllGro();
-            isplayerbout = true;
-            begin = false;
-            ready = false;
-        }
+        else;
+            //InitEnemy();
     }
     //卡牌显示
     private void Buildcard(int line,MonsterCard card,int id)
@@ -185,6 +219,7 @@ public class gamecontroller : MonoBehaviour
             d.controller = gameObject;
             d.enabled = false;
             square.AddComponent<MoveE>().enabled = false;
+            square.GetComponent<MoveE>().controller = gameObject;
             if (line == 1)
                 firshowed[id] = square;
             else if (line == 2)
@@ -197,18 +232,28 @@ public class gamecontroller : MonoBehaviour
     private Vector2 GetPosiion(Vector2 p)
     {
         Vector2 wprldpos = panel1.GetComponent<RectTransform>().TransformPoint(p);
-        return panel2.GetComponent<RectTransform>().InverseTransformPoint(wprldpos);
+        Vector2 newpos= panel2.GetComponent<RectTransform>().InverseTransformPoint(wprldpos);
+        newpos.y += 150;
+        return newpos;
     }
     //敌人卡牌从第二排进入第一排
     private void CardMove(int id)
     {
+        if (id == -1)
+            { return; }
+        if (id == -2) { re = true;return; }
         if (secshowed[id] != null)
         {
-            Transform t = secshowed[id].GetComponent<Transform>();
-            t.position = Vector3.MoveTowards(t.position, firstv[id], 500.0f * Time.deltaTime);
+            reend = true;
+            MoveE m = secshowed[id].GetComponent<MoveE>();
+            m.position = firstv[id];
+            m.enabled = true;
+            firstlinecards[id] = secondlinecards[id];
+            secondlinecards[id] = null;
             firshowed[id] = secshowed[id];
             secshowed[id] = null;
         }
+        else re = true;
     }
 
     private void CardMove(int id,int target,bool ispla)
@@ -238,6 +283,8 @@ public class gamecontroller : MonoBehaviour
     {
         firstlinecards[0] = new MonsterCard((MonsterCard)data.cards[11]);
         Buildcard(1, firstlinecards[0], 0);
+        secondlinecards[1] = new MonsterCard((MonsterCard)data.cards[2]);
+        Buildcard(2, secondlinecards[1], 1);
     }
     //初始加载第一排敌人
     private void InitEnemy()
@@ -247,6 +294,20 @@ public class gamecontroller : MonoBehaviour
         {
             Buildcard(1, firstlinecards[i], i);
         }
+        if (isboss)
+        {
+            if (isActive)
+            {
+                ShowText(2);
+                enabled = false;
+            }
+            else
+            {
+                ShowText(1);
+                enabled = false;
+            }
+        }
+        inited = true;
     }
     //玩家卡牌攻击阶段
     private void PlayerAttack()
@@ -268,13 +329,6 @@ public class gamecontroller : MonoBehaviour
     //敌人卡牌攻击阶段
     private void EnemyAttack()
     {
-        for (int i = 0; i < 4; i++)
-            if (firstlinecards[i] == null)
-            {
-                firstlinecards[i] = secondlinecards[i];
-                secondlinecards[i] = null;
-                CardMove(i);
-            }
         AttackEvent();
     }
     //每回合加载第二排敌人
@@ -341,18 +395,31 @@ public class gamecontroller : MonoBehaviour
     {
         if(playerWin)
         {
-            GetComponent<SceneChange1>().LoadSceneWithWhiteFade("AwardScene");
+            Invoke("VectResult", 1f);
         }
         else
         {
-            if(life==2)
-            {
-                life--;
-            }
-            else
-            {
-                GetComponent<SceneChange1>().LoadSceneWithWhiteFade("FailedScene");
-            }
+            Invoke("FailedResult", 1f);
+        }
+        enabled = false;
+    }
+
+    private void VectResult()
+    {
+        GetComponent<SceneChange1>().LoadSceneWithWhiteFade("AwardScene");
+    }
+
+    private void FailedResult()
+    {
+        if (life == 2)
+        {
+            life--;
+            ShowText(3);
+            //返回地图
+        }
+        else
+        {
+            GetComponent<SceneChange1>().LoadSceneWithWhiteFade("FailedScene");
         }
     }
     //我方卡牌激活刻印
@@ -486,7 +553,7 @@ public class gamecontroller : MonoBehaviour
                     break;
                 case Stamp.Growth:
                     isGro2[id] = true;
-                    playercards[id].stamps[i] = Stamp.NullStamp;
+                    firstlinecards[id].stamps[i] = Stamp.NullStamp;
                     break;
                 case Stamp.Motion:
                     isMot = true;
@@ -643,7 +710,7 @@ public class gamecontroller : MonoBehaviour
                 if (firstlinecards[i].health==0)
                 {
                     if (firstlinecards[i].cardID == 15)
-                        panel2.GetComponent<playerbout>().GetAward();
+                        panel2.GetComponent<playerbout>().GetAward1();
                     firstlinecards[i] = null;
                     firshowed[i].GetComponent<DelEvent>().enabled = true;
                     enabled = false;
@@ -718,25 +785,25 @@ public class gamecontroller : MonoBehaviour
                     firstlinecards[id] = new MonsterCard((MonsterCard)data.cards[3]);
                     firstlinecards[id].stamps[0] = Stamp.NullStamp;
                     firshowed[id].GetComponent<CardDisplay>().card = firstlinecards[id];
-                    showedpla[id].GetComponent<CardDisplay>().ShowCard();
+                    firshowed[id].GetComponent<CardDisplay>().ShowCard();
                     break;
                 case 4:
                     firstlinecards[id] = new MonsterCard((MonsterCard)data.cards[5]);
                     firstlinecards[id].stamps[0] = Stamp.NullStamp;
                     firshowed[id].GetComponent<CardDisplay>().card = firstlinecards[id];
-                    showedpla[id].GetComponent<CardDisplay>().ShowCard();
+                    firshowed[id].GetComponent<CardDisplay>().ShowCard();
                     break;
                 case 11:
                     firstlinecards[id] = new MonsterCard((MonsterCard)data.cards[13]);
                     firstlinecards[id].stamps[0] = Stamp.NullStamp;
                     firshowed[id].GetComponent<CardDisplay>().card = firstlinecards[id];
-                    showedpla[id].GetComponent<CardDisplay>().ShowCard();
+                    firshowed[id].GetComponent<CardDisplay>().ShowCard();
                     break;
                 default:
                     firstlinecards[id].attack += 1;
                     firstlinecards[id].health += 2;
                     firstlinecards[id].cardName = "长毛" + firstlinecards[id].cardName;
-                    showedpla[id].GetComponent<CardDisplay>().ShowCard();
+                    firshowed[id].GetComponent<CardDisplay>().ShowCard();
                     break;
             }
         }
@@ -770,11 +837,6 @@ public class gamecontroller : MonoBehaviour
         FindDefStamp();
         if (!begin)
         {
-            int timer = 0;
-            while (timer < 800)
-            {
-                timer += 1;
-            }
             if (playercards[ind] != null)
             {
                 Stamps1(ind);
@@ -788,11 +850,6 @@ public class gamecontroller : MonoBehaviour
         }
         else
         {
-            int timer = 0;
-            while (timer < 800)
-            {
-                timer += 1;
-            }
             if (firstlinecards[ind] != null)
             {
                 Stamps2(ind);
@@ -804,6 +861,7 @@ public class gamecontroller : MonoBehaviour
             }
             ind++;
         }
+        Debug.Log(ind);
         ChangeShowedCard();
     }
 
@@ -811,6 +869,7 @@ public class gamecontroller : MonoBehaviour
     {
         for(int i=0;i<4;i++)
         {
+            Debug.Log("show" + i);
             if (playercards[i] != null)
                 showedpla[i].GetComponent<CardDisplay>().ShowCard();
             if (firshowed[i] != null)
@@ -826,12 +885,17 @@ public class gamecontroller : MonoBehaviour
             if (isGro1[i])
             {
                 GrowthStamp1(i);
+                isGro1[i] = false;
+                Debug.Log("pla" + i);
             }
             if (isGro2[i])
-                GrowthStamp2(i);
+                { GrowthStamp2(i);
+                isGro2[i] = false;
+                Debug.Log("fir" + 1);
+            }
         }
     }
-    private void ReBegin()
+    private void ReBegin1()
     {
         isActive = true;
         damageEnemyReceived = 0;
@@ -842,12 +906,17 @@ public class gamecontroller : MonoBehaviour
         {
             if (playercards[i]!=null)
             {
-                playercards[i] = (MonsterCard)GetComponent<CardStore>().cards[14];
+                playercards[i] = new MonsterCard((MonsterCard)GetComponent<CardStore>().cards[14]);
                 showedpla[i].GetComponent<CardDisplay>().card = playercards[i];
+                showedpla[i].GetComponent<CardDisplay>().ShowCard();
             }
             firstlinecards[i] = null;
+            if (firshowed[i] != null)
+                firshowed[i].GetComponent<DelEvent>().enabled = true;
             firshowed[i] = null;
             secondlinecards[i] = null;
+            if (secshowed[i]!=null)
+                secshowed[i].GetComponent<DelEvent>().enabled = true;
             secshowed[i] = null;
         }
         firstline = new Queue<MonsterCard>();
@@ -855,13 +924,19 @@ public class gamecontroller : MonoBehaviour
         thirdline = new Queue<MonsterCard>();
         fourthline = new Queue<MonsterCard>();
         allEnemy = anotherEnemy;
-        firstlinecards[1]= (MonsterCard)GetComponent<CardStore>().cards[12];
+        Invoke("ReBegin2", 1f);
+    }
+
+    private void ReBegin2()
+    {
+        firstlinecards[1] = new MonsterCard((MonsterCard)GetComponent<CardStore>().cards[12]);
         Buildcard(1, firstlinecards[1], 1);
+        idofThi = 1;
         isplayerbout = true;
         begin = false;
         ready = false;
+        panel1.GetComponent<playerbout>().ReBegin();
     }
-
     public void DefMove(bool ispla,int id)
     {
         if(ispla)
@@ -885,5 +960,41 @@ public class gamecontroller : MonoBehaviour
     {
         CardMove(idofThi, id, false);
         idofThi = id;
+    }
+
+    private void ShowText(int i)
+    {
+        enabled = false;
+        text.SetActive(true);
+        TextMeshProUGUI tmpText = text.GetComponent<TextMeshProUGUI>();
+        switch (i)
+        {
+            case 0:
+                tmpText.text = "You never lose before.\nThat's your award.";
+                Invoke("AwardAction", 1f);
+                break;
+            case 1:
+                tmpText.text = "Have you seen the mule? This's a surprise. \nTry to kill it.";
+                break;
+            case 2:
+                tmpText.text = "He's going to give it his all.\n It'll be over if we win him one more time";
+                break;
+            case 3:
+                tmpText.text = "You lost,but you have another chance.\nDont't lose again.";
+                break;
+        }
+        Invoke("StartEvent", 3f);
+    }
+
+    private void StartEvent()
+    {
+        text.SetActive(false);
+        enabled = true;
+    }
+
+    private void AwardAction()
+    {
+        playerbout p = panel1.GetComponent<playerbout>();
+        p.GetAward0();
     }
 }

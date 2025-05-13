@@ -59,6 +59,9 @@ public class ClickEvent : MonoBehaviour, IPointerClickHandler
     private void AddCard()
     {
         Debug.Log("UI元素被点击: " + gameObject.name + gameObject.name);
+        PlayerData p = GetComponent<PlayerData>();
+        p.playerCards[card.cardID].AddLast(card);
+        //返回地图
     }
     private void CardMove()
     {

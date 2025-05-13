@@ -7,20 +7,21 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static Unity.Burst.Intrinsics.Arm;
 
 public class playerbout : MonoBehaviour
 {
     public GameObject controller;
     public GameObject button;
     public GameObject newCard;//卡牌的预制体
-    public MonsterCard[] cards=new MonsterCard[4]; //牌堆
+    public MonsterCard[] cards; //牌堆
     public List<MonsterCard> handcards=new List<MonsterCard>();//手牌
     public List<GameObject> showedCards = new List<GameObject>();
     private int index; //抽牌堆中第几张牌
     private gamecontroller con;
     private bool inited;
     private bool ready;
-    private bool selected;
+    public bool selected;
     private Vector2 positionInit = new Vector2(317, 103);
     private Vector2[] position = new Vector2[4];
     private Vector2 size = new Vector2(107, 133);
@@ -45,7 +46,7 @@ public class playerbout : MonoBehaviour
         data = controller.GetComponent<PlayerData>();
         allCards = controller.GetComponent<CardStore>();
         InitTarget();
-        GetInitCards1();
+        GetInitCards();
     }
     private void GetInitCards1()
     {
@@ -57,11 +58,11 @@ public class playerbout : MonoBehaviour
         handcards.Add(newone1);
         BuildShowedcard(positionInit, size, newone1);
         CardsMove();
-        MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[10]);
+        MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[13]);
         handcards.Add(newone2);
         BuildShowedcard(positionInit, size, newone2);
         CardsMove();
-        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[2]);
+        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[13]);
         handcards.Add(newone3);
         BuildShowedcard(positionInit, size, newone3);
         CardsMove();
@@ -69,14 +70,15 @@ public class playerbout : MonoBehaviour
     private void GetInitCards()
     {
         int n = 0;
-        for(int i=0;i<11;i++)
+        for(int i=1;i<11;i++)
         {
             n += data.playerCards[i].Count;
         }
+        Debug.Log(n);
         cards = new MonsterCard[n];
 
         int id = 0;
-        for (int i = 0; i < 11; i++)
+        for (int i = 1; i < 11; i++)
         {
             int nu = data.playerCards[i].Count;
             LinkedListNode<Card> q = data.playerCards[i].First;
@@ -84,19 +86,29 @@ public class playerbout : MonoBehaviour
             {
                 MonsterCard p = (MonsterCard)q.Value;
                 cards[id] = p;
+                id++;
                 if (j != nu - 1)
                     q = q.Next;
             }
         }
-        System.Random rng = new System.Random(); // 创建随机数生成器
-        int nn = cards.Length;
-        while (n > 1)
+
+        for (int i = 0; i < n; i++)
         {
-            n--; // 当前未打乱的元素数量
-            int k = rng.Next(n + 1); // 随机选择一个索引
-            MonsterCard temp = cards[k]; // 交换当前元素和随机选中的元素
-            cards[k] = cards[n];
-            cards[n] = temp;
+            Debug.Log(cards[i].ToString());
+            Debug.Log(cards[i].sacrifice);
+        }
+
+        for (int i = 0; i < n; i++)
+        {
+            int randomIndex = UnityEngine.Random.Range(i, n);
+            MonsterCard temp = cards[i];
+            cards[i] = cards[randomIndex];
+            cards[randomIndex] = temp;
+        }
+        for (int i=0;i<n;i++)
+        {
+            Debug.Log(cards[i].ToString());
+            Debug.Log(cards[i].sacrifice);
         }
         if (cards[0].sacrifice!=1)
         {
@@ -108,14 +120,24 @@ public class playerbout : MonoBehaviour
                     MonsterCard temp = cards[0]; // 交换当前元素和随机选中的元素
                     cards[0] = cards[m];
                     cards[m] = temp;
+                    break;
                 }
                 else m++;
             }
         }
-        handcards.Add(GetBasicCard());
-        handcards.Add(GetOneHandCard());
-        handcards.Add(GetOneHandCard());
-        handcards.Add(GetOneHandCard());
+        MonsterCard newone = GetBasicCard();
+        handcards.Add(newone);
+        BuildShowedcard(positionInit, size, newone);
+        MonsterCard newone0 = GetOneHandCard();
+        handcards.Add(newone0);
+        BuildShowedcard(positionInit, size, newone0);
+        MonsterCard newone1 = GetOneHandCard();
+        handcards.Add(newone1);
+        BuildShowedcard(positionInit, size, newone1);
+        MonsterCard newone2 = GetOneHandCard();
+        handcards.Add(newone2);
+        BuildShowedcard(positionInit, size, newone2);
+        CardsMove();
     }
     private void BuildShowedcard(Vector2 position, Vector2 size,MonsterCard card)
     {
@@ -151,6 +173,7 @@ public class playerbout : MonoBehaviour
         d.controller = controller;
         d.enabled = false;
         square.AddComponent<MoveE>().enabled = false;
+        square.GetComponent<MoveE>().controller = controller;
         showedCards.Add(square);
     }
     public void CardsMove()
@@ -206,6 +229,7 @@ public class playerbout : MonoBehaviour
         {
             con.isplayerbout = false;
             ready = false;
+            selected = false;
         }
     }
     private MonsterCard GetOneHandCard()
@@ -253,27 +277,40 @@ public class playerbout : MonoBehaviour
         }
     }
 
-    public void GetAward()
+    public void GetAward1()
     {
         MonsterCard newone = GetBasicCard();
         handcards.Add(newone);
         BuildShowedcard(positionInit, size, newone);
         CardsMove();
-        MonsterCard newone1 = GetBasicCard();
-        handcards.Add(newone);
-        BuildShowedcard(positionInit, size, newone);
-        CardsMove();
         MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[13]);
-        handcards.Add(newone1);
-        BuildShowedcard(positionInit, size, newone1);
-        CardsMove();
-        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[10]);
         handcards.Add(newone2);
         BuildShowedcard(positionInit, size, newone2);
         CardsMove();
-        MonsterCard newone4 = new MonsterCard((MonsterCard)allCards.cards[2]);
+        MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[10]);
         handcards.Add(newone3);
         BuildShowedcard(positionInit, size, newone3);
         CardsMove();
+        MonsterCard newone4 = new MonsterCard((MonsterCard)allCards.cards[2]);
+        handcards.Add(newone4);
+        BuildShowedcard(positionInit, size, newone4);
+        CardsMove();
+    }
+
+    public void GetAward0()
+    {
+        MonsterCard newone1 = GetBasicCard();
+        handcards.Add(newone1);
+        BuildShowedcard(positionInit, size, newone1);
+        CardsMove();
+    }
+
+    public void ReBegin()
+    {
+        if(con.isplayerbout)
+        {
+            selected = false;
+            ready = false;
+        }
     }
 }
