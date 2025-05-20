@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class CarveManager : MonoBehaviour
 {
@@ -49,15 +50,15 @@ public class CarveManager : MonoBehaviour
         PlayerData.playerCards[BScard.cardID].Remove(BScard);
         PlayerData.playerCards[GScard.cardID].Remove(GScard);
 
-        MonsterCard bsCard=(MonsterCard)BScard;
+        MonsterCard bsCard = (MonsterCard)BScard;
         MonsterCard gsCard = (MonsterCard)GScard;
         foreach (var bstamp in bsCard.stamps)
         {
             if (bstamp == Stamp.NullStamp) break;
-            for(int i = 0; i < 3; i++)
+            for (int i = 0; i < 3; i++)
             {
                 if (gsCard.stamps[i] == bstamp) break;
-                if (gsCard.stamps[i] == Stamp.NullStamp) 
+                if (gsCard.stamps[i] == Stamp.NullStamp)
                 {
                     gsCard.stamps[i] = bstamp;
                     break;
@@ -72,6 +73,7 @@ public class CarveManager : MonoBehaviour
         ClearGS();
         ClearBS();
         Button.SetActive(false);
+        SceneManager.LoadScene("PlayScenes");
     }
 
 }

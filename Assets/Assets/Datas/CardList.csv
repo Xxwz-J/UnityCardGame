@@ -1,0 +1,17 @@
+﻿#,id,name,atk,health,sacrifice,stamp
+monster,0,松鼠,0,1,0,NullStamp
+monster,1,白釉,1,3,1,NullStamp
+monster,2,幼狼,1,2,1,Growth
+monster,3,狼,3,2,2,NullStamp
+monster,4,小鹿,1,2,1,Growth
+monster,5,鹿,2,4,2,Motion
+monster,6,蝰蛇,1,1,2,Poison
+monster,7,布谷鸟,1,2,1,Flying
+monster,8,乌鸦,2,3,2,Flying
+monster,9,鼹鼠,0,6,1,Defence
+monster,10,螳螂,1,1,1,Furcation
+monster,11,寻血猎犬,2,3,2,Thirsty
+monster,12,冰原狼幼崽,1,2,2,Growth
+monster,13,冰原狼,2,5,3,DoubleAttack
+monster,14,遗骸,0,2,0,NullStamp
+monster,15,骡子,0,5,0,NullStamp

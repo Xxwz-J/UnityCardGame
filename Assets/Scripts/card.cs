@@ -59,6 +59,11 @@ public class MonsterCard : Card
         this.healthmax = 1;
         this.sacrifice = 0;
     }
+    public override int GetHashCode()
+    {
+        
+        return HashCode.Combine(cardID, cardName);
+    }
     public MonsterCard(MonsterCard other):base(other.cardID,other.cardName)
     {
         this.attack = other.attack;
