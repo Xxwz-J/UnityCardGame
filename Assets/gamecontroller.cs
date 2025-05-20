@@ -184,11 +184,10 @@ public class gamecontroller : MonoBehaviour
                 isplayerbout = true;
                 begin = false;
                 ready = false;
-                inited = false;
             }
         }
-        else;
-            //InitEnemy();
+        else
+            InitEnemy();
     }
     //卡牌显示
     private void Buildcard(int line,MonsterCard card,int id)
@@ -281,10 +280,11 @@ public class gamecontroller : MonoBehaviour
     }
     private void InitEnemy1()
     {
-        firstlinecards[0] = new MonsterCard((MonsterCard)data.cards[11]);
+        firstlinecards[0] = new MonsterCard((MonsterCard)data.cards[15]);
         Buildcard(1, firstlinecards[0], 0);
         secondlinecards[1] = new MonsterCard((MonsterCard)data.cards[2]);
         Buildcard(2, secondlinecards[1], 1);
+        inited = true;
     }
     //初始加载第一排敌人
     private void InitEnemy()
@@ -296,12 +296,12 @@ public class gamecontroller : MonoBehaviour
         }
         if (isboss)
         {
-            if (isActive)
+            if (isActive&&numofRound==0)
             {
                 ShowText(2);
                 enabled = false;
             }
-            else
+            else if(numofRound==0)
             {
                 ShowText(1);
                 enabled = false;
@@ -408,16 +408,16 @@ public class gamecontroller : MonoBehaviour
     {
         GetComponent<SceneChange1>().LoadSceneWithWhiteFade("AwardScene");
     }
-
+    private bool showed = false;
     private void FailedResult()
     {
-        if (life == 2)
+        if (life == 2&&!showed)
         {
-            life--;
+            showed = true;
             ShowText(3);
             //返回地图
         }
-        else
+        else if(life==1)
         {
             GetComponent<SceneChange1>().LoadSceneWithWhiteFade("FailedScene");
         }
@@ -710,7 +710,7 @@ public class gamecontroller : MonoBehaviour
                 if (firstlinecards[i].health==0)
                 {
                     if (firstlinecards[i].cardID == 15)
-                        panel2.GetComponent<playerbout>().GetAward1();
+                        panel1.GetComponent<playerbout>().GetAward1();
                     firstlinecards[i] = null;
                     firshowed[i].GetComponent<DelEvent>().enabled = true;
                     enabled = false;

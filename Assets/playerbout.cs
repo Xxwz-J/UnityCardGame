@@ -130,13 +130,16 @@ public class playerbout : MonoBehaviour
         BuildShowedcard(positionInit, size, newone);
         MonsterCard newone0 = GetOneHandCard();
         handcards.Add(newone0);
+        index++;
         BuildShowedcard(positionInit, size, newone0);
         MonsterCard newone1 = GetOneHandCard();
         handcards.Add(newone1);
+        index++;
         BuildShowedcard(positionInit, size, newone1);
         MonsterCard newone2 = GetOneHandCard();
         handcards.Add(newone2);
         BuildShowedcard(positionInit, size, newone2);
+        index = 3;
         CardsMove();
     }
     private void BuildShowedcard(Vector2 position, Vector2 size,MonsterCard card)
@@ -234,7 +237,6 @@ public class playerbout : MonoBehaviour
     }
     private MonsterCard GetOneHandCard()
     {
-        index++;
         if(index==cards.Length-1)
         {
             button.SetActive(false);
@@ -251,6 +253,7 @@ public class playerbout : MonoBehaviour
         if (con.isplayerbout && !selected)
         {
             MonsterCard newone = GetOneHandCard();
+            index++;
             handcards.Add(newone);
             BuildShowedcard(positionInit, size, newone);
             CardsMove();
