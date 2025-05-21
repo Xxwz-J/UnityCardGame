@@ -1,0 +1,33 @@
+# Unity 生成的文件和目录
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/.vs/
+/.vscode/
+/.idea/
+
+# 项目设置文件
+/ProjectSettings/EditorBuildSettings.asset
+/ProjectSettings/ProjectVersion.txt
+
+# 自动生成的 Visual Studio 文件
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+
+# 资源缓存文件
+*.pidb.meta
+*.pdb.meta
+
+# 大文件或二进制文件
+*.zip
+*.7z
+*.assetbundle
+*.dll
