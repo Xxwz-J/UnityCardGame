@@ -20,7 +20,8 @@ public class LibraryManager : MonoBehaviour
     void Start()
     {
         UpdateLibrary();
-        CarveManager = GameObject.Find("CarveManager").GetComponent<CarveManager>();
+        //CarveManager = GameObject.Find("CarveManager").GetComponent<CarveManager>();
+        CarveManager = GameObject.Find("CarveManager")?.GetComponent<CarveManager>() ?? null;
 
     }
 
