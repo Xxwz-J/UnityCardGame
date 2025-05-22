@@ -48,7 +48,7 @@ public class PlayerData : MonoBehaviour
         }
     }
     public void SavePlayerData() {
-        string path = Application.dataPath + "/Datas/playerdata.csv";
+        string path = Application.dataPath + "/Assets/Datas/playerdata.csv";
         List<string> datas = new List<string>();
         for (int i = 0; i < playerCards.Length; i++) {
             int count = playerCards[i].Count;

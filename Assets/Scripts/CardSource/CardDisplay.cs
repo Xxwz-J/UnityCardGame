@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -39,30 +39,34 @@ public class CardDisplay : MonoBehaviour
             string path = $"CardImages/{monster.cardName}";
 
             string imagePath = $"CardImages/{monster.cardName}";
-            //string imagePath = $"CardImages/ËÉÊó";
+            //string imagePath = $"CardImages/æ¾é¼ ";
             Sprite cardSprite = Resources.Load<Sprite>(imagePath);
 
             if (cardSprite != null)
             {
                 background.sprite = cardSprite;
-                background.color = Color.white; // È·±£Image×é¼şÆôÓÃ
+                background.color = Color.white; // ç¡®ä¿Imageç»„ä»¶å¯ç”¨
             }
             else
             {
-                Debug.LogWarning($"¿¨ÅÆÍ¼Æ¬È±Ê§: {monster.cardName}");
-                background.color = Color.clear; // Òş²ØÎŞÍ¼Æ¬×´Ì¬
+                Debug.LogWarning($"å¡ç‰Œå›¾ç‰‡ç¼ºå¤±: {monster.cardName}");
+                background.color = Color.clear; // éšè—æ— å›¾ç‰‡çŠ¶æ€
             }
 
             for (int i = 0; i < 3; i++) {
                 MonsterCard monsterCard = (MonsterCard)card;
                 if (monsterCard.stamps[i] == Stamp.NullStamp) break;
-                GameObject stamp = Instantiate(StampPrefab, StampPool.transform);
+                // å…ˆåŠ è½½èµ„æºå†å®ä¾‹åŒ–
                 string stampPath = $"StampImages/{monsterCard.stamps[i]}";
-                StampPrefab.GetComponent<Image>().sprite = Resources.Load<Sprite>(stampPath);
+                Sprite stampSprite = Resources.Load<Sprite>(stampPath);
+
+                // å®ä¾‹åŒ–å¹¶é…ç½®æ–°å¯¹è±¡
+                GameObject stamp = Instantiate(StampPrefab, StampPool.transform);
+                stamp.GetComponent<Image>().sprite = stampSprite;
+
             }
 
             // Text.gameObject.SetActive(false)-- hide
         }
-        //»¹Ğè¸üĞÂÓ¡¼ÇÏÔÊ¾
     }
 }
