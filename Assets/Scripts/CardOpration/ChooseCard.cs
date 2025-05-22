@@ -27,6 +27,7 @@ public class ChooseCard : MonoBehaviour, IPointerDownHandler
         if(warmCard != null)
         {
             warmCard.choosing(gameObject);
+            transform.localScale = Vector2.one;
         }
     }
 }

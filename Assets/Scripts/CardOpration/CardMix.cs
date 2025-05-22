@@ -13,6 +13,9 @@ public class CardMix : MonoBehaviour
     public GameObject mixpool1;
     public GameObject mixpool2;
     public GameObject mixedpool;
+    public GameObject left;
+    public GameObject right;
+    public GameObject middle;
     public GameObject mixcard1;
     public GameObject mixcard2;
     public GameObject card1;
@@ -123,6 +126,8 @@ public class CardMix : MonoBehaviour
     {
         if(!pool1 || !pool2) return;
         if (done) return;
+        done = true;
+        setUi();
         card1.SetActive(false);
         card2.SetActive(false);
         MonsterCard temp1 = mixcard1.GetComponent<CardDisplay>().card as MonsterCard;
@@ -147,7 +152,7 @@ public class CardMix : MonoBehaviour
         }
         MonsterCard mixedcard = new MonsterCard(preid, temp1.cardName, temp1.attack + temp2.attack,
             temp1.healthmax + temp2.healthmax, temp1.sacrifice, total);
-        if (mixedcard.stamps[1] != Stamp.NullStamp) mixedcard.carved = true;
+        mixedcard.carved = temp1.carved || temp2.carved;
         GameObject newcard=GameObject.Instantiate(cardPrefab,mixedpool.transform);
         newcard.GetComponent<CardDisplay>().card = mixedcard;
         GameObject getnewcard = GameObject.Instantiate(cardPrefab, cardpool.transform);
@@ -161,7 +166,7 @@ public class CardMix : MonoBehaviour
     public void doneIt()                        //�����ںϰ�ť
     {
         done = true;
-        string path = Application.dataPath + "/Datas/playerdata.csv";
+        string path = Application.dataPath + "/Assets/Datas/playerData.csv";
         List<string> datas = new List<string>();
         foreach (Transform child in cardpool.transform)
         {
@@ -199,9 +204,15 @@ public class CardMix : MonoBehaviour
         else pushbutton.SetActive(false);
         if(done)
         {
-            mixpool1.SetActive(false);
-            mixpool2.SetActive(false);
-            mixedpool.SetActive(true);
+            left.SetActive(false);
+            right.SetActive(false);
+            middle.SetActive(true);
+        }
+        else
+        {
+            left.SetActive(true);
+            right.SetActive(true);
+            middle.SetActive(false);
         }
     }
 }

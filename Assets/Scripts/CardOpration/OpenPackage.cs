@@ -28,7 +28,6 @@ public class OpenPackage : MonoBehaviour
     {   if (opend) return;
         opend = true;
         ClearPool();
-        
         for (int i = 0; i < 3; i++)
         {
             GameObject card = GameObject.Instantiate(cardPrefab,cardPool.transform); //生成的card放到cardPool中
