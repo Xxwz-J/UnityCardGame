@@ -77,7 +77,7 @@ public class WarmCard : MonoBehaviour
     public void doneIt()                        //卡被吃掉或者玩家主动结束强化，锁死烤火按钮
     {
         abletoroast = true;
-        string path = Application.dataPath + "/Datas/playerdata.csv";
+        string path = Application.dataPath + "/Assets/Datas/playerdata.csv";
         List<string> datas = new List<string>();
         foreach (Transform child in cardpool.transform)
         {

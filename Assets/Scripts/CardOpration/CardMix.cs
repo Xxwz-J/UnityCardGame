@@ -13,6 +13,9 @@ public class CardMix : MonoBehaviour
     public GameObject mixpool1;
     public GameObject mixpool2;
     public GameObject mixedpool;
+    public GameObject left;
+    public GameObject right;
+    public GameObject middle;
     public GameObject mixcard1;
     public GameObject mixcard2;
     public GameObject card1;
@@ -39,7 +42,7 @@ public class CardMix : MonoBehaviour
     {
         
     }
-    public void LayoutPlayerCards()           //չʾ��ҿ���
+    public void LayoutPlayerCards()           //展示玩家全部卡组，不能融合的被隐藏
     {
         int i = 0;
         foreach (var Samenamecard in playerData.playerCards)
@@ -59,12 +62,12 @@ public class CardMix : MonoBehaviour
             }
             i++;
         }
-        if(!havesame)                     //�˴�Ӧ��ת��cardstore����������ȡһ���������͵ĸ��ƿ�
+        if(!havesame)                     //卡组中没有同名卡
         {
-            Debug.Log("��Ŀ���û�п��Ը���ѧ���ںϵĿ�Ƭ");
+            Debug.Log("你没有可以给菌学家合成的卡牌");
         }
     }
-    public void choosing(GameObject gameObject)     //ѡ����Ҫǿ���Ŀ�
+    public void choosing(GameObject gameObject)     //选择要融合的卡牌
     {
         if (abletochoose) return;
         if(gameObject.GetComponentInParent<GridLayoutGroup>().gameObject==mixpool1)
@@ -147,7 +150,7 @@ public class CardMix : MonoBehaviour
         }
         MonsterCard mixedcard = new MonsterCard(preid, temp1.cardName, temp1.attack + temp2.attack,
             temp1.healthmax + temp2.healthmax, temp1.sacrifice, total);
-        if (mixedcard.stamps[1] != Stamp.NullStamp) mixedcard.carved = true;
+        mixedcard.carved = temp1.carved || temp2.carved;
         GameObject newcard=GameObject.Instantiate(cardPrefab,mixedpool.transform);
         newcard.GetComponent<CardDisplay>().card = mixedcard;
         GameObject getnewcard = GameObject.Instantiate(cardPrefab, cardpool.transform);
@@ -161,7 +164,7 @@ public class CardMix : MonoBehaviour
     public void doneIt()                        //�����ںϰ�ť
     {
         done = true;
-        string path = Application.dataPath + "/Datas/playerdata.csv";
+        string path = Application.dataPath + "/Assets/Datas/playerdata.csv";
         List<string> datas = new List<string>();
         foreach (Transform child in cardpool.transform)
         {
@@ -197,11 +200,17 @@ public class CardMix : MonoBehaviour
     {
         if(pool1&&pool2)pushbutton.SetActive(true);
         else pushbutton.SetActive(false);
-        if(done)
+        if (done)
         {
-            mixpool1.SetActive(false);
-            mixpool2.SetActive(false);
-            mixedpool.SetActive(true);
+            left.SetActive(false);
+            right.SetActive(false);
+            middle.SetActive(true);
+        }
+        else
+        {
+            left.SetActive(true);
+            right.SetActive(true);
+            middle.SetActive(false);
         }
     }
 }
