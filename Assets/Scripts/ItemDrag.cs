@@ -39,9 +39,10 @@ public class ItemDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     {
         canvasGroup.alpha = 1f;
         canvasGroup.blocksRaycasts = true;
-
+        bool isDroppedInArea = eventData.pointerEnter != null &&
+        eventData.pointerEnter.CompareTag("DropArea");
         // 如果没有成功放入目标区域，返回原位
-        if (!eventData.pointerEnter.CompareTag("DropArea"))
+        if (!isDroppedInArea)
         {
             rectTransform.anchoredPosition = originalPosition;
         }
