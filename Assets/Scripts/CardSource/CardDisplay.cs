@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,7 +13,7 @@ public class CardDisplay : MonoBehaviour
     public GameObject StampPool;
     public GameObject StampPrefab;
     public Card card;
-
+    public List<GameObject> stamps;
     void Start()
     {
         ShowCard();
@@ -20,6 +21,7 @@ public class CardDisplay : MonoBehaviour
 
     public void ShowCard()
     {
+        ClearPool();
         // 防御层1：核心对象空引用检查
         if (card == null)
         {
@@ -60,9 +62,10 @@ public class CardDisplay : MonoBehaviour
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    if (monster.stamps[i] == Stamp.NullStamp) break;
+                    if (monster.stamps[i] == Stamp.NullStamp) continue;
 
                     GameObject stamp = Instantiate(StampPrefab, StampPool.transform);
+                    stamps.Add(stamp);
                     string stampPath = $"StampImages/{monster.stamps[i]}";
                     Image stampImage = stamp.GetComponent<Image>();
 
@@ -88,4 +91,14 @@ public class CardDisplay : MonoBehaviour
             Debug.LogWarning($"未找到文本组件: {textComponent?.gameObject.name}");
         }
     }
+
+    private void ClearPool()
+    {
+        foreach (var stamp in stamps)
+        {
+            Destroy(stamp);
+        }
+        stamps.Clear();
+    }
+
 }
