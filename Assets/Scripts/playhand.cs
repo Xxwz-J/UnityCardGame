@@ -95,7 +95,9 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         a.isFur = false;
         a.id = idoftarget;
         a.ispla = true;
-        a.targetPosition1 = con.firstv[idoftarget];
+        Vector2 po = con.firstv[idoftarget];
+        po.y -= 150;
+        a.targetPosition1 =po;
         pla.handcards.Remove(card);
         con.playercards[idoftarget] = card;
         con.showedpla[idoftarget] = showedcard;

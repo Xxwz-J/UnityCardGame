@@ -15,11 +15,15 @@ public class MoveE : MonoBehaviour
     }
     private void Update()
     {
+        if (transform.rotation.z != 0f)
+        {
+            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.identity, Time.deltaTime * 3f);
+        }
         rectTransform.anchoredPosition = Vector2.MoveTowards(
             rectTransform.anchoredPosition,
             position,
             800.0f * Time.deltaTime);
-        if (rectTransform.anchoredPosition.x == position.x && rectTransform.anchoredPosition.y == position.y)
+        if (rectTransform.anchoredPosition.x == position.x && rectTransform.anchoredPosition.y == position.y&& transform.rotation== Quaternion.identity)
         {
             enabled = false;
             if (con.reend)
