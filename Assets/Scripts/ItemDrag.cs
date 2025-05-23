@@ -12,8 +12,6 @@ public class ItemDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private CanvasGroup canvasGroup;
     private Vector2 originalPosition;
 
-    public CardStore cardStore;
-    public PlayerData playerData;
 
     void Awake()
     {
@@ -52,6 +50,6 @@ public class ItemDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
             rectTransform.anchoredPosition = originalPosition;
         }
 
-        //else playerData.LoadInitialData();
+        
     }
 }
