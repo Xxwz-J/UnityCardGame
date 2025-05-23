@@ -69,13 +69,13 @@ public class Attack : MonoBehaviour
         {
             // 返回起始位置
             transform.position = Vector2.MoveTowards(transform.position, startPosition, returnSpeed * Time.deltaTime);
-            if (transform.position.y == startPosition.y && isFur && !sec)
+            if (Vector2.Distance(transform.position, startPosition) < collisionDistance && isFur && !sec)
             {
                 sec = true;
                 targetPosition = targetPosition2;
                 isReturning = false;
             }
-            else if (transform.position.y == startPosition.y)
+            else if (Vector2.Distance(transform.position, startPosition) < collisionDistance)
             {
                 isReturning = false;
                 targetPosition = targetPosition1;

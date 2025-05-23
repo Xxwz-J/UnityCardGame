@@ -11,6 +11,7 @@ using static Unity.Burst.Intrinsics.Arm;
 
 public class playerbout : MonoBehaviour
 {
+    public Sprite sprite;
     public GameObject controller;
     public GameObject button;
     public GameObject newCard;//¿¨ÅÆµÄÔ¤ÖÆÌå
@@ -22,9 +23,10 @@ public class playerbout : MonoBehaviour
     private bool inited;
     private bool ready;
     public bool selected;
-    private Vector2 positionInit = new Vector2(317, 103);
+    private Vector2 positionInit1 = new Vector2(565, -140);
+    private Vector2 positionInit2 = new Vector2(815, -140);
     private Vector2[] position = new Vector2[4];
-    private Vector2 size = new Vector2(107, 133);
+    private Vector2 size = new Vector2(105, 140);
     private GameObject targetObj1;
     private GameObject targetObj2;
     private GameObject targetObj3;
@@ -37,11 +39,11 @@ public class playerbout : MonoBehaviour
         inited = false;
         ready = false;
         selected = true;
-        index = 0;
-        position[0] = new Vector2(-268, 103);
-        position[1] = new Vector2(-118, 103);
-        position[2] = new Vector2(32, 103);
-        position[3] = new Vector2(182, 103);
+        index = -1;
+        position[0] = new Vector2(-520, -140);
+        position[1] = new Vector2(-260, -140);
+        position[2] = new Vector2(0, -140);
+        position[3] = new Vector2(260, -140);
         con = controller.GetComponent<gamecontroller>();
         data = controller.GetComponent<PlayerData>();
         allCards = controller.GetComponent<CardStore>();
@@ -52,19 +54,19 @@ public class playerbout : MonoBehaviour
     {
         MonsterCard newone = GetBasicCard();
         handcards.Add(newone);
-        BuildShowedcard(positionInit, size, newone);
+        BuildShowedcard(positionInit2, size, newone);
         CardsMove();
         MonsterCard newone1 = new MonsterCard((MonsterCard)allCards.cards[13]);
         handcards.Add(newone1);
-        BuildShowedcard(positionInit, size, newone1);
+        BuildShowedcard(positionInit1, size, newone1);
         CardsMove();
         MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[13]);
         handcards.Add(newone2);
-        BuildShowedcard(positionInit, size, newone2);
+        BuildShowedcard(positionInit1, size, newone2);
         CardsMove();
         MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[13]);
         handcards.Add(newone3);
-        BuildShowedcard(positionInit, size, newone3);
+        BuildShowedcard(positionInit1, size, newone3);
         CardsMove();
     }
     private void GetInitCards()
@@ -127,16 +129,16 @@ public class playerbout : MonoBehaviour
         }
         MonsterCard newone = GetBasicCard();
         handcards.Add(newone);
-        BuildShowedcard(positionInit, size, newone);
+        BuildShowedcard(positionInit2, size, newone);
         MonsterCard newone0 = GetOneHandCard();
         handcards.Add(newone0);
-        BuildShowedcard(positionInit, size, newone0);
+        BuildShowedcard(positionInit1, size, newone0);
         MonsterCard newone1 = GetOneHandCard();
         handcards.Add(newone1);
-        BuildShowedcard(positionInit, size, newone1);
+        BuildShowedcard(positionInit1, size, newone1);
         MonsterCard newone2 = GetOneHandCard();
         handcards.Add(newone2);
-        BuildShowedcard(positionInit, size, newone2);
+        BuildShowedcard(positionInit1, size, newone2);
         CardsMove();
     }
     private void BuildShowedcard(Vector2 position, Vector2 size,MonsterCard card)
@@ -150,7 +152,8 @@ public class playerbout : MonoBehaviour
         square.transform.SetParent(transform, false);
 
         rectTransform.anchoredPosition = position;
-        rectTransform.sizeDelta = size;
+        rectTransform.localScale = new Vector2(0.7f, 0.7f);
+        rectTransform.rotation = transform.Find("deck").rotation;
 
         square.AddComponent<playhand>();
         playhand thisone = square.GetComponent<playhand>();
@@ -163,7 +166,7 @@ public class playerbout : MonoBehaviour
         thisone.showedcard = square;
         thisone.player = gameObject;
 
-        square.AddComponent<SelectObl>();
+        square.AddComponent<SelectObl>().sprite = sprite;
         Attack a=square.AddComponent<Attack>();
         a.enabled = false;
         a.contorller = controller;
@@ -179,14 +182,14 @@ public class playerbout : MonoBehaviour
     public void CardsMove()
     {
         int num = handcards.Count;
-        float setx = 60 - 60 * num;
+        float setx = 70 - 120 * num;
         for(int i=0;i<num;i++)
         {
-            Vector3 position = new Vector3(setx, -80, 0);
+            Vector3 position = new Vector3(setx, -510, 0);
             MoveE e= showedCards[i].GetComponent<MoveE>();
             e.position = position;
             e.enabled = true;
-            setx += 120;
+            setx += 240;
         }
     }
     private void InitTarget()
@@ -252,7 +255,7 @@ public class playerbout : MonoBehaviour
         {
             MonsterCard newone = GetOneHandCard();
             handcards.Add(newone);
-            BuildShowedcard(positionInit, size, newone);
+            BuildShowedcard(positionInit1, size, newone);
             CardsMove();
             selected = true;
         }
@@ -263,7 +266,7 @@ public class playerbout : MonoBehaviour
         {
             MonsterCard newone = GetBasicCard();
             handcards.Add(newone);
-            BuildShowedcard(positionInit, size, newone);
+            BuildShowedcard(positionInit2, size, newone);
             CardsMove();
             selected = true;
         }
@@ -281,19 +284,19 @@ public class playerbout : MonoBehaviour
     {
         MonsterCard newone = GetBasicCard();
         handcards.Add(newone);
-        BuildShowedcard(positionInit, size, newone);
+        BuildShowedcard(positionInit2, size, newone);
         CardsMove();
         MonsterCard newone2 = new MonsterCard((MonsterCard)allCards.cards[13]);
         handcards.Add(newone2);
-        BuildShowedcard(positionInit, size, newone2);
+        BuildShowedcard(positionInit1, size, newone2);
         CardsMove();
         MonsterCard newone3 = new MonsterCard((MonsterCard)allCards.cards[10]);
         handcards.Add(newone3);
-        BuildShowedcard(positionInit, size, newone3);
+        BuildShowedcard(positionInit1, size, newone3);
         CardsMove();
         MonsterCard newone4 = new MonsterCard((MonsterCard)allCards.cards[2]);
         handcards.Add(newone4);
-        BuildShowedcard(positionInit, size, newone4);
+        BuildShowedcard(positionInit1, size, newone4);
         CardsMove();
     }
 
@@ -301,7 +304,7 @@ public class playerbout : MonoBehaviour
     {
         MonsterCard newone1 = GetBasicCard();
         handcards.Add(newone1);
-        BuildShowedcard(positionInit, size, newone1);
+        BuildShowedcard(positionInit2, size, newone1);
         CardsMove();
     }
 
