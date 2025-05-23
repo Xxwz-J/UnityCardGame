@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+
 [RequireComponent(typeof(RectTransform))]
 public class ItemDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
@@ -10,6 +11,7 @@ public class ItemDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
     private Vector2 originalPosition;
+
 
     void Awake()
     {
@@ -41,10 +43,13 @@ public class ItemDrag : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         canvasGroup.blocksRaycasts = true;
         bool isDroppedInArea = eventData.pointerEnter != null &&
         eventData.pointerEnter.CompareTag("DropArea");
+        
         // 如果没有成功放入目标区域，返回原位
         if (!isDroppedInArea)
         {
             rectTransform.anchoredPosition = originalPosition;
         }
+
+        
     }
 }

@@ -48,7 +48,7 @@ public class PlayerData : MonoBehaviour
         }
     }
     public void SavePlayerData() {
-        string path = Application.dataPath + "/Datas/playerdata.csv";
+        string path = Application.dataPath + "/Assets/Datas/playerdata.csv";
         List<string> datas = new List<string>();
         for (int i = 0; i < playerCards.Length; i++) {
             int count = playerCards[i].Count;
@@ -60,5 +60,36 @@ public class PlayerData : MonoBehaviour
             }
         }
         File.WriteAllLines(path, datas);
+    }
+
+    public void LoadInitialData() {
+        string path = Application.dataPath + "/Assets/Datas/InitialCards.csv";
+        foreach (var list in playerCards)
+        {
+            list.Clear();
+        }
+        
+        string[] dataRow = File.ReadAllLines(path); ;
+        //playerCards = new int[CardStore.cards .Count];
+        playerCards = new LinkedList<Card>[CardStore.cards.Count];
+        for (int i = 0; i < playerCards.Length; i++)
+        {
+            playerCards[i] = new LinkedList<Card>();
+        }
+        foreach (string row in dataRow)
+        {
+            string[] rowArray = row.Split(',');
+            if (rowArray[0] == "#")
+            {
+                continue;
+            }
+            else if (rowArray[0] == "card")
+            {
+                int id = int.Parse(rowArray[1]);
+                var card = playerCards[id].AddLast(new MonsterCard((MonsterCard)CardStore.cards[id]));
+                card.Value.Update(row);
+            }
+        }
+        SavePlayerData();
     }
 }
