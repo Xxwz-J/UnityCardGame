@@ -111,7 +111,7 @@ public class WarmCard : MonoBehaviour
     {
         abletoroast = true;
         SetUI();
-        string path = Application.dataPath + "/Assets/Datas/playerdata.csv";
+        string path = Path.Combine(Application.persistentDataPath, "playerdata.csv");
         List<string> datas = new List<string>();
         foreach (Transform child in cardpool.transform)
         {

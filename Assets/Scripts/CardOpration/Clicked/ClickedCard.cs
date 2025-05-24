@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 
 
 
@@ -31,6 +32,7 @@ public class ClickedCard : MonoBehaviour,IPointerDownHandler
         PlayerData.playerCards[id].AddLast(new MonsterCard((MonsterCard)CardStore.cards[id]));
         PlayerData.SavePlayerData();
         OpenPackage.ClearPool();
+        SceneManager.LoadScene("PlayScenes");
     }
 
 }

@@ -2069,7 +2069,7 @@ MonoBehaviour:
   uiCamera: {fileID: 519420031}
   life: 2
   isboss: 0
-  isFirstGame: 1
+  isFirstGame: 0
   firshowed: []
   begin: 0
   idofThi: 0

@@ -160,7 +160,8 @@ public class gamecontroller : MonoBehaviour
             int result = damageEnemyReceived - damagePlayerReceived;
             path = $"balanceimage/{result.ToString()}";
             if (result > 5) path = "balanceimage/5";
-            Sprite newSprite= Resources.Load<Sprite>(path);
+            else if(result<-5) path = "balanceimage/-5";
+            Sprite newSprite = Resources.Load<Sprite>(path);
             balanceimage.sprite = newSprite;
             //Debug.Log("result:" + result);
             gameOver = result > 5 || result < -5;
@@ -239,7 +240,7 @@ public class gamecontroller : MonoBehaviour
         else
         {
             inited = true;
-            //InitEnemy();
+            InitEnemy1();
         }
         //InitEnemy();
     }
@@ -439,7 +440,6 @@ public class gamecontroller : MonoBehaviour
                 firstline.Enqueue(allEnemy[numofRound * 4 + 3]);
         }
     }
-    //��Ϸ����
     private void GameOver(bool playerWin)
     {
         if(playerWin)
@@ -457,7 +457,7 @@ public class gamecontroller : MonoBehaviour
     private void VectResult()
     {
         ShowText(7);
-        SceneManager.LoadScene("cardstore");
+        GetComponent<SceneChange1>().LoadSceneWithWhiteFade("cardstore");
         //
     }
 
@@ -467,7 +467,7 @@ public class gamecontroller : MonoBehaviour
         {
             life--;
             ShowText(3);
-            SceneManager.LoadScene("PlayScenes");
+            GetComponent<SceneChange1>().LoadSceneWithWhiteFade("PlayScenes");
             //���ص�ͼ
         }
         else
