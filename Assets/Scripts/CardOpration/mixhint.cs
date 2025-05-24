@@ -5,14 +5,15 @@ using Unity.VisualScripting;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class choosemix : MonoBehaviour, IPointerDownHandler
+public class mixhint : MonoBehaviour, IPointerDownHandler
 {
-    public CardMix cardMix;
+    public CardMix cardmix;
     // Start is called before the first frame update
     void Start()
     {
         
     }
+
     // Update is called once per frame
     void Update()
     {
@@ -20,10 +21,6 @@ public class choosemix : MonoBehaviour, IPointerDownHandler
     }
     public void OnPointerDown(PointerEventData pointerEventData)
     {
-        if (cardMix != null)
-        {
-            cardMix.choosing(gameObject);
-            transform.localScale = Vector2.one;
-        }
+        cardmix.showHint();
     }
 }

@@ -22,6 +22,7 @@ public class gamecontroller : MonoBehaviour
     public Camera uiCamera;
     public int life;//���ʣ����������   ---------------
     public bool isboss;//�Ƿ���bossս  ----------------
+    public bool isFirstGame;
     private bool isActive;//bossս�Ƿ����ڶ��غ�
     private int numofRound = 0;//�غ���
     public MonsterCard[] firstlinecards;//��һ�ŵ���
@@ -32,7 +33,7 @@ public class gamecontroller : MonoBehaviour
     private Queue<MonsterCard> secondline=new Queue<MonsterCard>();//�ڶ��е���
     private Queue<MonsterCard> thirdline=new Queue<MonsterCard>();//�����е���
     private Queue<MonsterCard> fourthline=new Queue<MonsterCard>();//�����е���
-    private bool begin;//����Ƿ񹥻�
+    public bool begin;//����Ƿ񹥻�
     private bool ready;//�з��Ƿ񹥻�
     private int idofDe1; //��ҷ��赲ӡ��ӵ����id
     private int idofDe2; //�з��赲ӡ��ӵ����id
@@ -42,12 +43,12 @@ public class gamecontroller : MonoBehaviour
     private bool gameOver;
     private Vector3 v1 = new Vector3(0, 0, -100);//���λ��1
     private Vector3 v2 = new Vector3(0, -175, -100);//���λ��2
-    private Vector2[] positionpla = new Vector2[4];
+    public Vector2[] positionpla = new Vector2[4];
     public Vector2[] firstv = new Vector2[4];//��һ�ſ���λ��
     private Vector2[] secondv = new Vector2[4];//�ڶ��ſ���λ��
     private Vector2 size = new Vector2(210, 280);
     private CardStore data;
-    private int ind = 0;
+    public int ind = 0;
     private bool[] isGro1 = new bool[4];
     private bool[] isGro2 = new bool[4];
     public bool re;
@@ -55,6 +56,11 @@ public class gamecontroller : MonoBehaviour
     private bool inited = false;
     private bool isMove = false;
     private int moveid;
+    private bool turnLeft = true;
+    public bool att = false;
+    public bool mov = false;
+    public bool sho = false;
+    public bool del = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -85,18 +91,18 @@ public class gamecontroller : MonoBehaviour
         damageEnemyReceived = 0;
         damagePlayerReceived = 0;
         gameOver = false;
-        positionpla[0] = new Vector2(-520, -140) / 2;
-        positionpla[1] = new Vector2(-260, -140) / 2;
-        positionpla[2] = new Vector2(0, -140) / 2;
-        positionpla[3] = new Vector2(260, -140) / 2;
-        firstv[0] = new Vector2(-520, 225) / 2;
-        firstv[1] = new Vector2(-260, 225) / 2;
-        firstv[2] = new Vector2(0, 225) / 2;
-        firstv[3] = new Vector2(260, 225) / 2;
-        secondv[0] = new Vector2(-520, 540) / 2;
-        secondv[1] = new Vector2(-260, 540) / 2;
-        secondv[2] = new Vector2(0, 540) / 2;
-        secondv[3] = new Vector2(260, 540) / 2;
+        positionpla[0] = new Vector2(-520, -140);
+        positionpla[1] = new Vector2(-260, -140);
+        positionpla[2] = new Vector2(0, -140);
+        positionpla[3] = new Vector2(260, -140);
+        firstv[0] = new Vector2(-520, 225);
+        firstv[1] = new Vector2(-260, 225);
+        firstv[2] = new Vector2(0, 225);
+        firstv[3] = new Vector2(260, 225);
+        secondv[0] = new Vector2(-520, 540);
+        secondv[1] = new Vector2(-260, 540);
+        secondv[2] = new Vector2(0, 540);
+        secondv[3] = new Vector2(260, 540);
         if (isboss)
         {
             if(life==2)
@@ -111,13 +117,35 @@ public class gamecontroller : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (att || del || sho || mov)
+            return;
         if (isMove)
         {
-            if (ind == 1)
-                CardMove(0, 1, !begin);
-            else CardMove(ind - 1, ind - 2, !begin);
+            if (turnLeft)
+            {
+                if (moveid == 0)
+                {
+                    CardMove(0, 1, !begin);
+                    ind++;
+                    turnLeft = false;
+                }
+                else CardMove(moveid, moveid - 1, !begin);
+            }
+            else
+            {
+                if (moveid == 3)
+                {
+                    CardMove(3, 2, !begin);
+                    turnLeft = true;
+                }
+                else
+                {
+                    CardMove(moveid, moveid + 1, !begin);
+                    ind++;
+                }
+            }
             isMove = false;
-            enabled = false;
+            mov = true;
             return;
         }
         ChangeShowedCard();
@@ -200,7 +228,8 @@ public class gamecontroller : MonoBehaviour
         }
         else
         {
-            InitEnemy1();
+            inited = true;
+            //InitEnemy();
         }
         //InitEnemy();
     }
@@ -218,8 +247,8 @@ public class gamecontroller : MonoBehaviour
             if (ChildTr != null)
                 square.transform.SetParent(ChildTr, false);
             if (line == 1)
-                rectTransform.anchoredPosition = firstv[id] * 2;
-            else if (line == 2) rectTransform.anchoredPosition = secondv[id] * 2;
+                rectTransform.anchoredPosition = firstv[id];
+            else if (line == 2) rectTransform.anchoredPosition = secondv[id];
             rectTransform.localScale = new Vector2(0.7f, 0.7f);
 
             Attack a = square.AddComponent<Attack>();
@@ -250,10 +279,11 @@ public class gamecontroller : MonoBehaviour
         if (id == -2) { re = true;return; }
         if (secshowed[id] != null)
         {
-            enabled = false;
+            mov = true;
             reend = true;
             MoveE m = secshowed[id].GetComponent<MoveE>();
-            m.position = firstv[id] * 2;
+            m.position = firstv[id];
+            m.begin = true;
             m.enabled = true;
             firstlinecards[id] = secondlinecards[id];
             secondlinecards[id] = null;
@@ -269,7 +299,8 @@ public class gamecontroller : MonoBehaviour
         if (!ispla)
         {
             MoveE m = firshowed[id].GetComponent<MoveE>();
-            m.position = firstv[target] * 2;
+            m.position = firstv[target];
+            m.begin = true;
             m.enabled = true;
             firshowed[target] = firshowed[id];
             firshowed[id] = null;
@@ -277,13 +308,13 @@ public class gamecontroller : MonoBehaviour
         else
         {
             MoveE m = showedpla[id].GetComponent<MoveE>();
-            m.position = positionpla[target] * 2;
+            m.position = positionpla[target];
+            m.begin = true;
             m.enabled = true;
             showedpla[target] = showedpla[id];
             showedpla[id] = null;
             isEmpty[target] = false;
             isEmpty[id] = true;
-            Debug.Log("move");
         }
     }
     private void InitEnemy1()
@@ -307,12 +338,12 @@ public class gamecontroller : MonoBehaviour
             if (isActive)
             {
                 ShowText(2);
-                enabled = false;
+                sho = true;
             }
             else
             {
                 ShowText(1);
-                enabled = false;
+                sho = true;
             }
         }
         inited = true;
@@ -409,14 +440,15 @@ public class gamecontroller : MonoBehaviour
         {
             Invoke("FailedResult", 1f);
         }
+        sho = true;
         enabled = false;
-        SceneManager.LoadScene("cardstore");
-
     }
 
     private void VectResult()
     {
-        GetComponent<SceneChange1>().LoadSceneWithWhiteFade("AwardScene");
+        ShowText(7);
+        SceneManager.LoadScene("cardstore");
+        //
     }
 
     private void FailedResult()
@@ -467,6 +499,8 @@ public class gamecontroller : MonoBehaviour
             }
         }
         Attack a = showedpla[id].GetComponent<Attack>();
+        a.id = id;
+        a.ispla = true;
         int aa = 0;
         if (isDou)
         {
@@ -538,25 +572,63 @@ public class gamecontroller : MonoBehaviour
                     AttackFront1(playercards[id], id);
             }
         }
+        a.targetPosition1.y -= 70;
+        a.targetPosition2.y -= 70;
         if (playercards[ind].attack != 0)
         {
             showedpla[ind].GetComponent<Attack>().enabled = true;
-            enabled = false;
+            att = true;
         }
         if (isMot)
         {
+            if (turnLeft)
+            {
+                if (id > 0 && playercards[id - 1] == null)
+                {
+                    playercards[id - 1] = playercards[id];
+                    playercards[id] = null;
+                }
+                else if (id > 0 && id != 3)
+                {
+                    if (playercards[id + 1] == null)
+                    {
+                        playercards[id + 1] = playercards[id];
+                        playercards[id] = null;
+                        turnLeft = false;
+                    }
+                }
+                else if (id == 0 && playercards[id + 1] == null)
+                {
+                    playercards[id + 1] = playercards[id];
+                    playercards[id] = null;
+                }
+                else return;
+            }
+            else
+            {
+                if (id < 3 && playercards[id + 1] == null)
+                {
+                    playercards[id + 1] = playercards[id];
+                    playercards[id] = null;
+                }
+                else if (id < 3 && id != 0)
+                {
+                    if (playercards[id - 1] == null)
+                    {
+                        playercards[id - 1] = playercards[id];
+                        playercards[id] = null;
+                        turnLeft = true;
+                    }
+                }
+                else if (id == 3 && playercards[id - 1] == null)
+                {
+                    playercards[id - 1] = playercards[id];
+                    playercards[id] = null;
+                }
+                else return;
+            }
             isMove = true;
-            moveid = ind;
-            if (id > 0 && playercards[id-1]==null)
-            {
-                playercards[id - 1] = playercards[id];
-                playercards[id] = null;
-            }
-            else if (id < 3 && playercards[id+1]==null)
-            {
-                playercards[id + 1] = playercards[id];
-                playercards[id] = null;
-            }
+            moveid = id;
         }
     }
     //�з����Ƽ����ӡ
@@ -593,6 +665,8 @@ public class gamecontroller : MonoBehaviour
             }
         }
         Attack a = firshowed[id].GetComponent<Attack>();
+        a.id = id;
+        a.ispla = false;
         int aa = 0;
         if (isDou)
         {
@@ -648,25 +722,63 @@ public class gamecontroller : MonoBehaviour
                     AttackFront2(firstlinecards[id], id);
             }
         }
+        a.targetPosition1.y += 100;
+        a.targetPosition2.y += 100;
         if (firstlinecards[ind].attack != 0)
         {
             firshowed[ind].GetComponent<Attack>().enabled = true;
-            enabled = false;
+            att = true;
         }
         if (isMot)
         {
+            if (turnLeft)
+            {
+                if (id > 0 && firstlinecards[id - 1] == null)
+                {
+                    firstlinecards[id - 1] = firstlinecards[id];
+                    firstlinecards[id] = null;
+                }
+                else if(id>0&&id!=3)
+                {
+                    if (firstlinecards[id + 1] == null)
+                    {
+                        firstlinecards[id + 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                        turnLeft = false;
+                    }
+                }
+                else if (id == 0 && firstlinecards[id + 1] == null)
+                {
+                    firstlinecards[id + 1] = firstlinecards[id];
+                    firstlinecards[id] = null;
+                }
+                else return;
+            }
+            else
+            {
+                if (id < 3 && firstlinecards[id + 1] == null)
+                {
+                    firstlinecards[id + 1] = firstlinecards[id];
+                    firstlinecards[id] = null;
+                }
+                else if(id<3&&id!=0)
+                {
+                    if (firstlinecards[id - 1] == null)
+                    {
+                        firstlinecards[id - 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                        turnLeft = true;
+                    }
+                }
+                else if (id == 3 && firstlinecards[id - 1] == null)
+                {
+                    firstlinecards[id - 1] = firstlinecards[id];
+                    firstlinecards[id] = null;
+                }
+                else return;
+            }
             isMove = true;
-            moveid = ind;
-            if (id > 0 && firstlinecards[id - 1] == null)
-            {
-                firstlinecards[id - 1] = firstlinecards[id];
-                firstlinecards[id] = null;
-            }
-            else if (id < 3 && firstlinecards[id + 1] == null)
-            {
-                firstlinecards[id + 1] = firstlinecards[id];
-                firstlinecards[id] = null;
-            }
+            moveid = id;
         }
     }
     //�ҷ����ƹ���ǰ������
@@ -853,50 +965,59 @@ public class gamecontroller : MonoBehaviour
             if (showedpla[i] != null)
             {
                 showedpla[i].GetComponent<CardDisplay>().ShowCard();
-                if (playercards[i].health == 0)
+                if (playercards[i] != null)
                 {
-                    playercards[i] = null;
-                    showedpla[i].GetComponent<DelEvent>().enabled = true;
-                    enabled = false;
-                    showedpla[i] = null;
-                    //
-                    if (i == idofDe1)
-                        FindDefStamp();
-                    if (isGro1[i])
-                        isGro1[i] = false;
-                    isEmpty[i] = true;
+                    if (playercards[i].health == 0)
+                    {
+                        playercards[i] = null;
+                        showedpla[i].GetComponent<DelEvent>().enabled = true;
+                        del = true;
+                        showedpla[i] = null;
+                        //
+                        if (i == idofDe1)
+                            FindDefStamp();
+                        if (isGro1[i])
+                            isGro1[i] = false;
+                        isEmpty[i] = true;
+                    }
                 }
             }
             if (firshowed[i] != null)
             {
                 firshowed[i].GetComponent<CardDisplay>().ShowCard();
-                if (firstlinecards[i].health == 0)
+                if (firstlinecards[i] != null)
                 {
-                    if (firstlinecards[i].cardID == 15)
-                        panel1.GetComponent<playerbout>().GetAward1();
-                    firstlinecards[i] = null;
-                    firshowed[i].GetComponent<DelEvent>().enabled = true;
-                    enabled = false;
-                    firshowed[i] = null;
-                    //
-                    if (i == idofThi)
-                        idofThi = -1;
-                    if (isGro2[i])
-                        isGro2[i] = false;
-                    if (i == idofDe2)
-                        FindDefStamp();
+                    if (firstlinecards[i].health == 0)
+                    {
+                        if (firstlinecards[i].cardID == 15)
+                            panel1.GetComponent<playerbout>().GetAward1();
+                        firstlinecards[i] = null;
+                        firshowed[i].GetComponent<DelEvent>().enabled = true;
+                        del = true;
+                        firshowed[i] = null;
+                        //
+                        if (i == idofThi)
+                            idofThi = -1;
+                        if (isGro2[i])
+                            isGro2[i] = false;
+                        if (i == idofDe2)
+                            FindDefStamp();
+                    }
                 }
             }
             if (secshowed[i] != null)
             {
                 secshowed[i].GetComponent<CardDisplay>().ShowCard();
-                if (secondlinecards[i].health == 0)
+                if (secondlinecards[i] != null)
                 {
-                    secondlinecards[i] = null;
-                    secshowed[i].GetComponent<DelEvent>().enabled = true;
-                    enabled = false;
-                    secshowed[i] = null;
-                    //
+                    if (secondlinecards[i].health == 0)
+                    {
+                        secondlinecards[i] = null;
+                        secshowed[i].GetComponent<DelEvent>().enabled = true;
+                        del = true;
+                        secshowed[i] = null;
+                        //
+                    }
                 }
             }
         }
@@ -987,9 +1108,9 @@ public class gamecontroller : MonoBehaviour
         idofThi = id;
     }
 
-    private void ShowText(int i)
+    public void ShowText(int i)
     {
-        enabled = false;
+        sho = true;
         text.SetActive(true);
         TextMeshProUGUI tmpText = text.GetComponent<TextMeshProUGUI>();
         switch (i)
@@ -1007,6 +1128,18 @@ public class gamecontroller : MonoBehaviour
             case 3:
                 tmpText.text = "You lost,but you have another chance.\nDont't lose again.";
                 break;
+            case 4:
+                tmpText.text = "Remains cann't be selected to be sacrifice.";
+                break;
+            case 5:
+                tmpText.text = "Placement failed: not enough Sacrificial offerings.";
+                break;
+            case 6:
+                tmpText.text = "Please draw a card first.";
+                break;
+            case 7:
+                tmpText.text = "You won. It won't be that easy later.";
+                break;
         }
         Invoke("StartEvent", 3f);
     }
@@ -1014,7 +1147,7 @@ public class gamecontroller : MonoBehaviour
     private void StartEvent()
     {
         text.SetActive(false);
-        enabled = true;
+        sho = false;
     }
 
     private void AwardAction()

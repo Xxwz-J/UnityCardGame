@@ -2,11 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Security.Cryptography;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Assertions.Must;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
+using static System.Net.Mime.MediaTypeNames;
 using static Unity.Burst.Intrinsics.Arm;
 
 public class playerbout : MonoBehaviour
@@ -33,6 +36,9 @@ public class playerbout : MonoBehaviour
     private GameObject targetObj4;
     private CardStore allCards;
     private PlayerData data;
+    private bool[] showed = new bool[9];
+    private int timer = 0;
+    private bool limit;
     // Start is called before the first frame update
     void Start()
     {
@@ -47,6 +53,8 @@ public class playerbout : MonoBehaviour
         con = controller.GetComponent<gamecontroller>();
         data = controller.GetComponent<PlayerData>();
         allCards = controller.GetComponent<CardStore>();
+        for (int i = 0; i < 7; i++)
+            showed[i] = false;
         InitTarget();
         GetInitCards();
     }
@@ -56,7 +64,7 @@ public class playerbout : MonoBehaviour
         handcards.Add(newone);
         BuildShowedcard(positionInit2, size, newone);
         CardsMove();
-        MonsterCard newone1 = new MonsterCard((MonsterCard)allCards.cards[13]);
+        MonsterCard newone1 = new MonsterCard((MonsterCard)allCards.cards[9]);
         handcards.Add(newone1);
         BuildShowedcard(positionInit1, size, newone1);
         CardsMove();
@@ -223,16 +231,22 @@ public class playerbout : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (con.isFirstGame && !showed[8])
+        {
+            FirstGame();
+        }
         if (con.isplayerbout && !inited)
         {
             ready = false;
             selected = false;
+            inited = true;
         }
         if (con.isplayerbout && ready)
         {
             con.isplayerbout = false;
             ready = false;
             selected = false;
+            inited = false;
         }
     }
     private MonsterCard GetOneHandCard()
@@ -273,11 +287,13 @@ public class playerbout : MonoBehaviour
     }
     public void OnClick3()
     {
-        if (selected)
-        {
-            ready = true;
-            selected = false;
-        }
+        if (!con.isFirstGame || showed[7])
+            if (selected)
+            {
+                ready = true;
+                selected = false;
+            }
+            else con.ShowText(6);
     }
 
     public void GetAward1()
@@ -315,5 +331,188 @@ public class playerbout : MonoBehaviour
             selected = false;
             ready = false;
         }
+    }
+
+    private void FirstGame()
+    {
+        if (!showed[0])
+        {
+            if(!limit)
+                LimitAction(0);
+            ShowText(0);
+            timer++;
+            if (timer == 1000)
+            {
+                showed[0] = true;
+                timer = 0;
+                limit = false;
+                return;
+            }
+        }
+        else if (!showed[1])
+        {
+            ShowText(1);
+            timer++;
+            if (timer == 1000)
+            {
+                showed[1] = true;
+                timer = 0;
+                return;
+            }
+        }
+        else if (!showed[2])
+        {
+            if (!limit)
+                LimitAction(1);
+            ShowText(2);
+            for(int i=0;i<4;i++)
+            {
+                if (!con.isEmpty[i])
+                {
+                    showed[2] = true;
+                    limit = false;
+                    return;
+                }
+            }
+        }
+        else if (!showed[3])
+        {
+            ShowText(3);
+            for (int i = 0; i < 4; i++)
+                if (con.isUsed[i])
+                {
+                    showed[3] = true;
+                    limit = false;
+                    return;
+                }
+        }
+        else if (!showed[4])
+        {
+            ShowText(4);
+            timer++;
+            if (timer == 1000)
+            {
+                showed[4] = true;
+                timer = 0;
+                return;
+            }
+        }
+        else if (!showed[7])
+        {
+            ShowText(7);
+            timer++;
+            if (timer == 1000)
+            {
+                showed[7] = true;
+                timer = 0;
+                return;
+            }
+        }
+        else if (!showed[5])
+        {
+            if (!limit)
+                DelLimit();
+            if (showedCards.Count == 2)
+                ShowText(5);
+            if (ready)
+            {
+                showed[5] = true;
+                limit = false;
+                con.text.SetActive(false);
+                return;
+            }
+        }
+        else if (!showed[6])
+        {
+            if (!con.begin && con.ind == 3&&!limit)
+            {
+                con.enabled = false;
+                ShowText(6);
+            }
+            timer++;
+            if (timer == 1000)
+            {
+                showed[6] = true;
+                timer = 0;
+                limit = false;
+                con.enabled = true;
+                return;
+            }
+        }
+        else if (!showed[8])
+        {
+            if(!limit)
+            {
+                ShowText(8);
+            }
+            if(selected)
+            {
+                showed[8] = true;
+                con.text.SetActive(false);
+            }
+        }
+    }
+
+    private void ShowText(int id)
+    {
+        con.text.SetActive(true);
+        TextMeshProUGUI tmpText = con.text.GetComponent<TextMeshProUGUI>();
+        switch (id)
+        {
+            case 0:
+                tmpText.text = "Are you awake?";
+                break;
+            case 1:
+                tmpText.text = "Still remember how to play?";
+                break;
+            case 2:
+                tmpText.text = "Put a squirrel card on it.";
+                break;
+            case 3:
+                tmpText.text = "Sacrifice this poor little fellow.";
+                break;
+            case 4:
+                tmpText.text = "Sometimes one offering might not be enough.";
+                break;
+            case 7:
+                tmpText.text = "Now your creation can come into play.";
+                break;
+            case 5:
+                tmpText.text = "Are you ready? Press this bell.";
+                break;
+            case 6:
+                tmpText.text = "If the plane is completely tilted, you will win.";
+                limit = true;
+                break;
+            case 8:
+                tmpText.text = "You can draw a card from the deck or a squirrel card.";
+                limit = true;
+                break;
+        }
+    }
+    private void HidText()
+    {
+        con.text.SetActive(false);
+        con.enabled = true;
+        showed[6] = true;
+        limit = false;
+    }
+    private void LimitAction(int num)
+    {
+        if(num==0)
+            showedCards[0].GetComponent<playhand>().allowDragging = false;
+        else
+            showedCards[0].GetComponent<playhand>().allowDragging = true;
+        showedCards[1].GetComponent<playhand>().allowDragging = false;
+        showedCards[2].GetComponent<playhand>().allowDragging = false;
+        showedCards[3].GetComponent<playhand>().allowDragging = false;
+        limit = true;
+    }
+    private void DelLimit()
+    {
+        showedCards[0].GetComponent<playhand>().allowDragging = true;
+        showedCards[1].GetComponent<playhand>().allowDragging = true;
+        showedCards[2].GetComponent<playhand>().allowDragging = true;
+        limit = true;
     }
 }
