@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class gamecontroller : MonoBehaviour
@@ -61,6 +63,8 @@ public class gamecontroller : MonoBehaviour
     public bool mov = false;
     public bool sho = false;
     public bool del = false;
+    public string path;
+    public Image balanceimage;
     // Start is called before the first frame update
     void Start()
     {
@@ -113,6 +117,8 @@ public class gamecontroller : MonoBehaviour
         }
         data = GetComponent<CardStore>();
         re = false;
+        path = "balanceimage/0";
+        balanceimage.sprite = Resources.Load<Sprite>(path);
     }
     // Update is called once per frame
     void Update()
@@ -152,6 +158,9 @@ public class gamecontroller : MonoBehaviour
         if (ind >= 4)
         {
             int result = damageEnemyReceived - damagePlayerReceived;
+            path = $"balanceimage/{result.ToString()}";
+            Sprite newSprite= Resources.Load<Sprite>(path);
+            balanceimage.sprite = newSprite;
             //Debug.Log("result:" + result);
             gameOver = result > 5 || result < -5;
             if (gameOver)
