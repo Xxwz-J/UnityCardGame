@@ -29,7 +29,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
     private Vector2 originalPosition;
     private bool isInTargetArea = false;
     public int idoftarget;
-    private bool allowDragging = true;
+    public bool allowDragging = true;
     private gamecontroller con;
 
     [Header("拖拽限制")]
@@ -155,6 +155,7 @@ public class playhand : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDrag
         }
         else
         {
+            if (isInTargetArea) con.ShowText(5);
             // 未放到目标区域，返回原处
             ReturnToOriginalPosition();
             Debug.Log("未放到目标位置，已返回原处");

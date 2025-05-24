@@ -1568,8 +1568,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4278979598
-  m_fontColor: {r: 0.05660379, g: 0.04716982, b: 0.04716982, a: 1}
+    rgba: 4278650805
+  m_fontColor: {r: 0.7106918, g: 0.02905331, b: 0.02905331, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1586,10 +1586,10 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 72
-  m_fontSizeBase: 36
+  m_fontSize: 100
+  m_fontSizeBase: 100
   m_fontWeight: 400
-  m_enableAutoSizing: 1
+  m_enableAutoSizing: 0
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -1991,15 +1991,27 @@ MonoBehaviour:
   uiCamera: {fileID: 519420031}
   life: 2
   isboss: 0
+  isFirstGame: 1
   firshowed: []
+  begin: 0
   idofThi: 0
+  positionpla:
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
+  - {x: 0, y: 0}
   firstv:
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
   - {x: 0, y: 0}
+  ind: 0
   re: 0
   reend: 0
+  att: 0
+  mov: 0
+  sho: 0
+  del: 0
 --- !u!114 &1574254894
 MonoBehaviour:
   m_ObjectHideFlags: 0

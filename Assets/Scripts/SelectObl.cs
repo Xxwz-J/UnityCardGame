@@ -19,6 +19,11 @@ public class SelectObl : MonoBehaviour, IPointerClickHandler
     {
         if (pla.isPlaced)
         {
+            if(gameObject.GetComponent<CardDisplay>().card.cardID==14)
+            {
+                con.ShowText(4);
+                return;
+            }
             if (isSel)
             {
                 Transform child = transform.Find("CoverImage");
