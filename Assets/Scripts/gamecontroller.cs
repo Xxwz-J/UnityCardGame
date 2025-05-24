@@ -441,13 +441,13 @@ public class gamecontroller : MonoBehaviour
             Invoke("FailedResult", 1f);
         }
         sho = true;
-        SceneManager.LoadScene("cardstore");
-
+        enabled = false;
     }
 
     private void VectResult()
     {
         ShowText(7);
+        SceneManager.LoadScene("cardstore");
         //
     }
 

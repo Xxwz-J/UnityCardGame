@@ -239,6 +239,7 @@ public class playerbout : MonoBehaviour
         {
             ready = false;
             selected = false;
+            inited = true;
         }
         if (con.isplayerbout && ready)
         {
