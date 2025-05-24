@@ -159,6 +159,7 @@ public class gamecontroller : MonoBehaviour
         {
             int result = damageEnemyReceived - damagePlayerReceived;
             path = $"balanceimage/{result.ToString()}";
+            if (result > 5) path = "balanceimage/5";
             Sprite newSprite= Resources.Load<Sprite>(path);
             balanceimage.sprite = newSprite;
             //Debug.Log("result:" + result);
