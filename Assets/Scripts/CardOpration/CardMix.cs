@@ -24,15 +24,29 @@ public class CardMix : MonoBehaviour
     public GameObject cardPrefab;
     public PlayerData playerData;
     public LinkedList<GameObject> mixableCardList=new LinkedList<GameObject>();
+
+    public GameObject hintObject;
+    public Text hinttext;
+
     bool havesame=false;
     bool abletochoose = false;
     bool pool1=false;
     bool pool2=false;
     bool done = false;
+    bool hintover = false;
     int preid = -1;
+    int hintcount = 0;
+
+    string[] mixhint = new string[5];
     // Start is called before the first frame update
     void Start()
     {
+        mixhint[0] = "你来到一处林中空地";
+        mixhint[1] = "地上有一朵双生蘑菇";
+        mixhint[2] = "菌学家在研究这朵蘑菇";
+        mixhint[3] = "“如果你有像双生蘑菇一样的造物”";
+        mixhint[4] = "“也许我能给你展示一下我的研究成果”";
+        showHint();
         LayoutPlayerCards();
         setUi();
     }
@@ -41,6 +55,20 @@ public class CardMix : MonoBehaviour
     void Update()
     {
         
+    }
+    public void showHint()
+    {
+        if (hintcount > 4)
+        {
+            hintObject.SetActive(false);
+            hintover = true;
+            setUi();
+            return;
+        }
+        hinttext.text = mixhint[hintcount];
+        hintcount++;
+        setUi();
+        return;
     }
     public void LayoutPlayerCards()           //展示玩家全部卡组，不能融合的被隐藏
     {
@@ -198,6 +226,14 @@ public class CardMix : MonoBehaviour
 
     public void setUi()
     {
+        if(!hintover)
+        {
+            pushbutton.SetActive(false);
+            left.SetActive(false);
+            right.SetActive(false);
+            middle.SetActive(false);
+            return;
+        }
         if(pool1&&pool2)pushbutton.SetActive(true);
         else pushbutton.SetActive(false);
         if (done)

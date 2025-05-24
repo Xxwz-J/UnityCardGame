@@ -2,6 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 public class CarveManager : MonoBehaviour
 {
@@ -19,10 +22,27 @@ public class CarveManager : MonoBehaviour
 
     public GameObject Button;
     public PlayerData PlayerData;
+
+    public GameObject hintObject;
+    public Text hinttext;
+    public GameObject pool1;
+    public GameObject pool2;
+    public GameObject pool3;
+
     public bool[] select = { false,false };// 0-GS 1-BS
+
+    string[] carvehint = new string[5];
+    int hintcount = 0;
+    bool hintover = false;
     // Start is called before the first frame update
     void Start()
     {
+        carvehint[0] = "你走进一座建筑物";
+        carvehint[1] = "你惊讶地发现这是一座神殿";
+        carvehint[2] = "神像里传出极具蛊惑力的低语";
+        carvehint[3] = "“献祭放入左侧的卡牌”";
+        carvehint[4] = "“放入右侧的卡牌将获得新生”";
+        showHint();
         if (Button != null) Button.SetActive(false);
     }
 
@@ -31,7 +51,20 @@ public class CarveManager : MonoBehaviour
     {
         
     }
-
+    public void showHint()
+    {
+        if (hintcount > 4)
+        {
+            hintObject.SetActive(false);
+            hintover = true;
+            SetUI();
+            return;
+        }
+        hinttext.text = carvehint[hintcount];
+        hintcount++;
+        SetUI();
+        return;
+    }
     public void ClearGS()
     {
         Destroy(GScardObject);
@@ -75,5 +108,25 @@ public class CarveManager : MonoBehaviour
         Button.SetActive(false);
         SceneManager.LoadScene("PlayScenes");
     }
-
+    public void SetUI()
+    {
+        if (!hintover)
+        {
+            pool1.SetActive(false);
+            pool2.SetActive(false);
+            Button.SetActive(false);
+            foreach (Transform child in pool3.transform)
+            {
+                child.gameObject.SetActive(false);
+            }
+            return;
+        }
+        pool1.SetActive(true);
+        pool2.SetActive(true);
+        foreach (Transform child in pool3.transform)
+        {
+            child.gameObject.SetActive(true);
+        }
+        return;
+    }
 }
