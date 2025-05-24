@@ -73,10 +73,23 @@ public class CardStore : MonoBehaviour
             }
         }
     }
-        public Card RandomCard()
+    public Card RandomCard()
     {
         Card card = cards[UnityEngine.Random.Range(1, cards.Count-3)];
         return card;
+    }
+    public Card SpecCard(int i)
+    {
+        Card card = cards[i];
+
+        return card;
+    }
+
+    public MonsterCard SpecMonster(int i)
+    {
+        Card card = cards[i];
+        MonsterCard monsterCard = new MonsterCard((MonsterCard)card);
+        return monsterCard;
     }
 
     public void SetUI()
