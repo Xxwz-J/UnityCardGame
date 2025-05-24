@@ -13,7 +13,6 @@ public class choosemix : MonoBehaviour, IPointerDownHandler
     {
         
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -24,6 +23,7 @@ public class choosemix : MonoBehaviour, IPointerDownHandler
         if (cardMix != null)
         {
             cardMix.choosing(gameObject);
+            transform.localScale = Vector2.one;
         }
     }
 }

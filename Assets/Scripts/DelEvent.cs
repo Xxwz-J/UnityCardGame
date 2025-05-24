@@ -37,6 +37,11 @@ public class DelEvent : MonoBehaviour
         }
         // 动画完成后，销毁对象
         Destroy(gameObject);
-        con.enabled = true;
+        con.del = false;
+    }
+
+    public void StartExternalCoroutine()
+    {
+        StartCoroutine(FadeOut());
     }
 }

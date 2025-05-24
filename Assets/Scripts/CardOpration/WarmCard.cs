@@ -4,24 +4,43 @@ using UnityEngine;
 using System.IO;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine.UI;
+using Unity.VisualScripting;
+using UnityEditor.Animations;
+
 
 public class WarmCard : MonoBehaviour
 {
     public GameObject cardpool;
     public GameObject onFire;
+    public GameObject FireObject;
     public GameObject cardPrefab;
     public PlayerData playerData;
     public List<GameObject> cardObjects = new List<GameObject>();
     public GameObject chosenCard;
     public GameObject onfirecard;
+    public GameObject firebutton;
+    public GameObject leavebutton;
     public Card card;
+
+    public GameObject hintObject;
+    public Text hinttext;
     //int count =0;
+    bool hintover = false;
     bool abletochoose=false;
     bool abletoroast = false;
     int roastTime = 0;
+    int hintcount = 0;
+
+    string[] firehint = new string[5];
     // Start is called before the first frame update
     void Start()
     {
+        firehint[0] = "你看到森林中有一个火堆";
+        firehint[1] = "火堆周围有一些饥肠辘辘的幸存者";
+        firehint[2] = "其中一个幸存者对你说";
+        firehint[3] = "“让你的造物过来烤烤火吧”";
+        firehint[4] = "“这会增强他们的力量”";
+        showHint();
         LayoutPlayerCards();
     }
 
@@ -31,6 +50,20 @@ public class WarmCard : MonoBehaviour
         
     }
 
+    public void showHint()
+    {
+        if (hintcount > 4)
+        {
+            hintObject.SetActive(false);
+            hintover= true;
+            SetUI();
+            return;
+        }
+        hinttext.text = firehint[hintcount];
+        hintcount++;
+        SetUI();
+        return;
+    }
     public void LayoutPlayerCards()           //展示玩家卡组
     {
         foreach(var Samenamecard in playerData.playerCards)
@@ -77,7 +110,8 @@ public class WarmCard : MonoBehaviour
     public void doneIt()                        //卡被吃掉或者玩家主动结束强化，锁死烤火按钮
     {
         abletoroast = true;
-        string path = Application.dataPath + "/Datas/playerdata.csv";
+        SetUI();
+        string path = Application.dataPath + "/Assets/Datas/playerdata.csv";
         List<string> datas = new List<string>();
         foreach (Transform child in cardpool.transform)
         {
@@ -97,22 +131,32 @@ public class WarmCard : MonoBehaviour
         if (roastTime == 0)                    //锁死onfire卡槽，禁用choosing函数
         {
             abletochoose = true;
+            SetUI();
+
+            hintObject.SetActive(true);
+            hinttext.text = "一个幸存者摸着腰上的刀";
+
             upgrade();
             roastTime++;
             return;
         }
         if (roastTime == 1 && Random.Range(0, 2) == 0)
         {
+            hintObject.SetActive(true);
+            hinttext.text = "另一个幸存者舔了舔嘴唇";
             upgrade();
             roastTime++;
             return;
         }
         else
         {
-            Debug.Log("幸存者们一拥而上，吃掉了" + chosenCard.GetComponent<CardDisplay>().card.cardName);
+            hintObject.SetActive(true);
+            hinttext.text = "幸存者们一拥而上，吃掉了" + chosenCard.GetComponent<CardDisplay>().card.cardName;
+            //Debug.Log("幸存者们一拥而上，吃掉了" + chosenCard.GetComponent<CardDisplay>().card.cardName);
             DestroyImmediate(onfirecard);
             DestroyImmediate(chosenCard);
             abletoroast = true;
+            SetUI();
             doneIt();
         }
     }
@@ -130,5 +174,33 @@ public class WarmCard : MonoBehaviour
             onfirecard = temp;
             chosenCard.GetComponent<CardDisplay>().card= monster;
         }
+    }
+
+    public void SetUI()
+    {
+        if(!hintover)
+        {
+            FireObject.SetActive(false);
+            cardpool.SetActive(false);
+            firebutton.SetActive(false);
+            leavebutton.SetActive(false);
+            return;
+        }
+        if(abletochoose)
+        {
+            foreach (Transform child in cardpool.transform)
+            { 
+                child.gameObject.SetActive(false);
+            }
+        }
+        if(abletoroast)
+        {
+            firebutton.SetActive(false);
+            return;
+        }
+        FireObject.SetActive(true);
+        cardpool.SetActive(true);
+        firebutton.SetActive(true);
+        leavebutton.SetActive(true);
     }
 }

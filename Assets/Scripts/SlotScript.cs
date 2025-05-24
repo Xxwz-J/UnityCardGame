@@ -11,6 +11,9 @@ public class SlotScript : MonoBehaviour, IDropHandler
     // 缓存场景验证结果（优化性能）
     private bool _isSceneValid;
 
+    public CardStore cardStore;
+    public PlayerData playerData;
+
     void Start()
     {
         // 启动时预验证场景有效性
@@ -54,11 +57,13 @@ public class SlotScript : MonoBehaviour, IDropHandler
     private void ExecuteNewGame()
     {
         Debug.Log("触发新游戏事件");
+        playerData.LoadInitialData();
 
         // 版本1：直接场景跳转
         if (_isSceneValid)
         {
             // 重置游戏状态（按需添加）
+            playerData.LoadInitialData();
             // PlayerPrefs.DeleteAll();
             // GameManager.Instance.ResetGame();
 

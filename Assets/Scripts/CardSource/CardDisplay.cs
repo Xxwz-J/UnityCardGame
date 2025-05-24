@@ -1,10 +1,10 @@
-ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CardDisplay : MonoBehaviour
 {
+    // ±£³ÖÔ­ÓĞpublic×Ö¶Î²»±ä
     public Text nameText;
     public Text attackText;
     public Text healthText;
@@ -13,60 +13,92 @@ public class CardDisplay : MonoBehaviour
     public GameObject StampPool;
     public GameObject StampPrefab;
     public Card card;
-
-    // Start is called before the first frame update
+    public List<GameObject> stamps;
     void Start()
     {
         ShowCard();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public void ShowCard()
     {
-        nameText.text=card.cardName;
-
-        if(card is MonsterCard)
+        ClearPool();
+        // ·ÀÓù²ã1£ººËĞÄ¶ÔÏó¿ÕÒıÓÃ¼ì²é
+        if (card == null)
         {
-            var monster =  card as MonsterCard;
-            attackText.text = monster.attack.ToString();
-            healthText.text = monster.health.ToString();
-            sacrificeText.text = monster .sacrifice.ToString();
-            string path = $"CardImages/{monster.cardName}";
+            Debug.LogWarning("Card reference is not set in CardDisplay!");
+            return;
+        }
 
+        // ·ÀÓù²ã2£ºUI×é¼ş°²È«·ÃÎÊ
+        SafeSetText(nameText, card.cardName);
+
+        if (card is MonsterCard monster)
+        {
+            // ·ÀÓù²ã3£ºÊıÖµÏÔÊ¾°²È«·ÃÎÊ
+            SafeSetText(attackText, monster.attack.ToString());
+            SafeSetText(healthText, monster.health.ToString());
+            SafeSetText(sacrificeText, monster.sacrifice.ToString());
+
+            // ·ÀÓù²ã4£ºÍ¼Æ¬¼ÓÔØ°²È«»úÖÆ
             string imagePath = $"CardImages/{monster.cardName}";
-            //string imagePath = $"CardImages/æ¾é¼ ";
             Sprite cardSprite = Resources.Load<Sprite>(imagePath);
 
-            if (cardSprite != null)
+            if (background != null)
             {
-                background.sprite = cardSprite;
-                background.color = Color.white; // ç¡®ä¿Imageç»„ä»¶å¯ç”¨
+                if (cardSprite != null)
+                {
+                    background.sprite = cardSprite;
+                    background.color = Color.white;
+                }
+                else
+                {
+                    Debug.LogWarning($"¿¨ÅÆÍ¼Æ¬È±Ê§: {monster.cardName}");
+                    background.color = Color.clear;
+                }
             }
-            else
+
+            // ·ÀÓù²ã5£ºÓ¡¼ÇÏµÍ³°²È«Éú³É
+            if (StampPool != null && StampPrefab != null)
             {
-                Debug.LogWarning($"å¡ç‰Œå›¾ç‰‡ç¼ºå¤±: {monster.cardName}");
-                background.color = Color.clear; // éšè—æ— å›¾ç‰‡çŠ¶æ€
+                for (int i = 0; i < 3; i++)
+                {
+                    if (monster.stamps[i] == Stamp.NullStamp) continue;
+
+                    GameObject stamp = Instantiate(StampPrefab, StampPool.transform);
+                    stamps.Add(stamp);
+                    string stampPath = $"StampImages/{monster.stamps[i]}";
+                    Image stampImage = stamp.GetComponent<Image>();
+
+                    if (stampImage != null)
+                    {
+                        Sprite s = Resources.Load<Sprite>(stampPath);
+                        if (s != null) stampImage.sprite = s;
+                    }
+                }
             }
-
-            for (int i = 0; i < 3; i++) {
-                MonsterCard monsterCard = (MonsterCard)card;
-                if (monsterCard.stamps[i] == Stamp.NullStamp) break;
-                // å…ˆåŠ è½½èµ„æºå†å®ä¾‹åŒ–
-                string stampPath = $"StampImages/{monsterCard.stamps[i]}";
-                Sprite stampSprite = Resources.Load<Sprite>(stampPath);
-
-                // å®ä¾‹åŒ–å¹¶é…ç½®æ–°å¯¹è±¡
-                GameObject stamp = Instantiate(StampPrefab, StampPool.transform);
-                stamp.GetComponent<Image>().sprite = stampSprite;
-
-            }
-
-            // Text.gameObject.SetActive(false)-- hide
         }
     }
+
+    // ĞÂÔöµÄ°²È«ÎÄ±¾ÉèÖÃ·½·¨
+    private void SafeSetText(Text textComponent, string value)
+    {
+        if (textComponent != null)
+        {
+            textComponent.text = value;
+        }
+        else
+        {
+            Debug.LogWarning($"Î´ÕÒµ½ÎÄ±¾×é¼ş: {textComponent?.gameObject.name}");
+        }
+    }
+
+    private void ClearPool()
+    {
+        foreach (var stamp in stamps)
+        {
+            Destroy(stamp);
+        }
+        stamps.Clear();
+    }
+
 }
