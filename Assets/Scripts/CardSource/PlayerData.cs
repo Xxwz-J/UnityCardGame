@@ -16,6 +16,7 @@ public class PlayerData : MonoBehaviour
     void Start()
     {
         CardStore.LoadCardData();
+        //LoadInitialData();
         LoadPlayerData();
     }
 
@@ -100,10 +101,11 @@ public class PlayerData : MonoBehaviour
 
     public void LoadInitialData() {
         string path = Application.dataPath + "/Assets/Datas/InitialCards.csv";
-        foreach (var list in playerCards)
-        {
-           list.Clear();
-        }
+       // foreach (var list in playerCards)
+       // {
+       //    if (list!=null)
+      //     list.Clear();
+      //  }
         
         string[] dataRow = File.ReadAllLines(path); ;
         //playerCards = new int[CardStore.cards .Count];

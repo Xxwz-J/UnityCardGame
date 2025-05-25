@@ -1942,6 +1942,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1574254892}
   - component: {fileID: 1574254896}
+  - component: {fileID: 1574254897}
   - component: {fileID: 1574254895}
   - component: {fileID: 1574254894}
   - component: {fileID: 1574254893}
@@ -2070,6 +2071,7 @@ MonoBehaviour:
   life: 2
   isboss: 0
   isFirstGame: 0
+  isActive: 0
   firshowed: []
   begin: 0
   idofThi: 0
@@ -2135,6 +2137,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   whiteFadeImage: {fileID: 2134918118}
   fadeDuration: 1
+--- !u!114 &1574254897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1574254888}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37b5f08aa94265348988d04cdd84267f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  data1: {fileID: 4900000, guid: 0a8a011646879314aaeb58805d506f34, type: 3}
+  data2: {fileID: 4900000, guid: 8046034e2f8290440b1eacfcb9a86c02, type: 3}
+  data3: {fileID: 4900000, guid: a529c878afc90bb4c887d3e3f99632c8, type: 3}
+  data4_1: {fileID: 4900000, guid: a9bb4f87a5a48e94e935e3089f3dd134, type: 3}
+  data4_2: {fileID: 4900000, guid: 2de7549901dc65b4b94615b663e0403c, type: 3}
+  inited: 0
 --- !u!1 &1747823142
 GameObject:
   m_ObjectHideFlags: 0

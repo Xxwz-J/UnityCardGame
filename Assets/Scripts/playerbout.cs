@@ -84,7 +84,6 @@ public class playerbout : MonoBehaviour
         {
             n += data.playerCards[i].Count;
         }
-        Debug.Log(n);
         cards = new MonsterCard[n];
 
         int id = 0;
@@ -101,24 +100,12 @@ public class playerbout : MonoBehaviour
                     q = q.Next;
             }
         }
-
-        for (int i = 0; i < n; i++)
-        {
-            Debug.Log(cards[i].ToString());
-            Debug.Log(cards[i].sacrifice);
-        }
-
         for (int i = 0; i < n; i++)
         {
             int randomIndex = UnityEngine.Random.Range(i, n);
             MonsterCard temp = cards[i];
             cards[i] = cards[randomIndex];
             cards[randomIndex] = temp;
-        }
-        for (int i=0;i<n;i++)
-        {
-            Debug.Log(cards[i].ToString());
-            Debug.Log(cards[i].sacrifice);
         }
         if (cards[0].sacrifice!=1)
         {
