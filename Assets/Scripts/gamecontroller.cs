@@ -136,7 +136,7 @@ public class gamecontroller : MonoBehaviour
     {
         if (att || del || sho || mov)
             return;
-        if (isMove && ((isboss && !firround)||!isboss))
+        if (isMove && ((isboss && !firround&&begin)||!isboss||(!begin&&isboss&&firround)))
         {
             if (turnLeft)
             {
@@ -165,7 +165,7 @@ public class gamecontroller : MonoBehaviour
             mov = true;
             return;
         }
-        else if (isMove && (isboss && firround))
+        else if (isMove && (isboss && firround&&begin))
             { firround = false;isMove = false; }
             ChangeShowedCard();
         if (ind >= 4)
@@ -613,7 +613,7 @@ public class gamecontroller : MonoBehaviour
             showedpla[ind].GetComponent<Attack>().enabled = true;
             att = true;
         }
-        if (isMot&&((isboss&&!firround)||!isboss))
+        if (isMot)
         {
             if (turnLeft)
             {
@@ -763,53 +763,55 @@ public class gamecontroller : MonoBehaviour
             firshowed[ind].GetComponent<Attack>().enabled = true;
             att = true;
         }
-        if (isMot&&((isboss&&!firround)||!isboss))
+        if (isMot)
         {
-            if (turnLeft)
-            {
-                if (id > 0 && firstlinecards[id - 1] == null)
+            if((isboss && !firround) || !isboss){
+                if (turnLeft)
                 {
-                    firstlinecards[id - 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
-                }
-                else if(id>0&&id!=3)
-                {
-                    if (firstlinecards[id + 1] == null)
-                    {
-                        firstlinecards[id + 1] = firstlinecards[id];
-                        firstlinecards[id] = null;
-                        turnLeft = false;
-                    }
-                }
-                else if (id == 0 && firstlinecards[id + 1] == null)
-                {
-                    firstlinecards[id + 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
-                }
-                else return;
-            }
-            else
-            {
-                if (id < 3 && firstlinecards[id + 1] == null)
-                {
-                    firstlinecards[id + 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
-                }
-                else if(id<3&&id!=0)
-                {
-                    if (firstlinecards[id - 1] == null)
+                    if (id > 0 && firstlinecards[id - 1] == null)
                     {
                         firstlinecards[id - 1] = firstlinecards[id];
                         firstlinecards[id] = null;
-                        turnLeft = true;
                     }
+                    else if (id > 0 && id != 3)
+                    {
+                        if (firstlinecards[id + 1] == null)
+                        {
+                            firstlinecards[id + 1] = firstlinecards[id];
+                            firstlinecards[id] = null;
+                            turnLeft = false;
+                        }
+                    }
+                    else if (id == 0 && firstlinecards[id + 1] == null)
+                    {
+                        firstlinecards[id + 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                    }
+                    else return;
                 }
-                else if (id == 3 && firstlinecards[id - 1] == null)
+                else
                 {
-                    firstlinecards[id - 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
+                    if (id < 3 && firstlinecards[id + 1] == null)
+                    {
+                        firstlinecards[id + 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                    }
+                    else if (id < 3 && id != 0)
+                    {
+                        if (firstlinecards[id - 1] == null)
+                        {
+                            firstlinecards[id - 1] = firstlinecards[id];
+                            firstlinecards[id] = null;
+                            turnLeft = true;
+                        }
+                    }
+                    else if (id == 3 && firstlinecards[id - 1] == null)
+                    {
+                        firstlinecards[id - 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                    }
+                    else return;
                 }
-                else return;
             }
             isMove = true;
             moveid = id;
