@@ -14,4 +14,4 @@ monster,11,寻血猎犬,2,3,2,Thirsty
 monster,12,冰原狼幼崽,1,2,2,Growth
 monster,13,冰原狼,2,5,3,DoubleAttack
 monster,14,遗骸,0,2,0,NullStamp
-monster,15,骡子,0,5,0,NullStamp
+monster,15,骡子,0,5,0,Motion

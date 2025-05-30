@@ -6,6 +6,7 @@ using Unity.Collections.LowLevel.Unsafe;
 using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 using UnityEngine.UIElements;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class CardMix : MonoBehaviour
 {
@@ -36,6 +37,7 @@ public class CardMix : MonoBehaviour
     bool hintover = false;
     int preid = -1;
     int hintcount = 0;
+    bool jump = false;
 
     string[] mixhint = new string[5];
     // Start is called before the first frame update
@@ -60,9 +62,21 @@ public class CardMix : MonoBehaviour
     {
         if (hintcount > 4)
         {
-            hintObject.SetActive(false);
-            hintover = true;
-            setUi();
+            if(jump)
+            {
+                SceneManager.LoadScene("cardstore");
+            }
+            if (!havesame)                     //卡组中没有同名卡
+            {
+                hinttext.text="你没有可以给菌学家合成的卡牌";
+                jump = true;
+            }
+            if(!jump)
+            {
+                hintObject.SetActive(false);
+                hintover = true;
+                setUi();
+            }
             return;
         }
         hinttext.text = mixhint[hintcount];
@@ -90,10 +104,11 @@ public class CardMix : MonoBehaviour
             }
             i++;
         }
-        if(!havesame)                     //卡组中没有同名卡
-        {
-            Debug.Log("你没有可以给菌学家合成的卡牌");
-        }
+        //if(!havesame)                     //卡组中没有同名卡
+        //{
+        //    Debug.Log("你没有可以给菌学家合成的卡牌");
+        //    SceneManager.LoadScene("cardstore");
+        //}
     }
     public void choosing(GameObject gameObject)     //选择要融合的卡牌
     {
@@ -192,7 +207,8 @@ public class CardMix : MonoBehaviour
     public void doneIt()                        //�����ںϰ�ť
     {
         done = true;
-        string path = Application.dataPath + "/Assets/Datas/playerdata.csv";
+        setUi();
+        string path = Path.Combine(Application.persistentDataPath, "playerdata.csv");
         List<string> datas = new List<string>();
         foreach (Transform child in cardpool.transform)
         {
@@ -232,9 +248,14 @@ public class CardMix : MonoBehaviour
             left.SetActive(false);
             right.SetActive(false);
             middle.SetActive(false);
+            foreach (Transform child in cardpool.transform)
+            {
+                child.gameObject.SetActive(false);
+            }
             return;
         }
-        if(pool1&&pool2)pushbutton.SetActive(true);
+        showmixablecard();
+        if (pool1&&pool2)pushbutton.SetActive(true);
         else pushbutton.SetActive(false);
         if (done)
         {

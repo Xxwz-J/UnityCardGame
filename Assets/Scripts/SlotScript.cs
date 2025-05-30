@@ -41,7 +41,7 @@ public class SlotScript : MonoBehaviour, IDropHandler
 
             case ItemDrag.ItemType.Continue:
                 Debug.Log("触发继续游戏事件");
-                // 建议添加存档加载逻辑
+                SceneManager.LoadScene("PlayScenes");
                 break;
 
             case ItemDrag.ItemType.Sound:
@@ -57,7 +57,7 @@ public class SlotScript : MonoBehaviour, IDropHandler
     private void ExecuteNewGame()
     {
         Debug.Log("触发新游戏事件");
-        playerData.LoadInitialData();
+     
 
         // 版本1：直接场景跳转
         if (_isSceneValid)

@@ -1,9 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using TMPro;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class gamecontroller : MonoBehaviour
@@ -15,16 +17,14 @@ public class gamecontroller : MonoBehaviour
     public bool isplayerbout; //�Ƿ�����һغ�
     public MonsterCard[] playercards = new MonsterCard[4];
     public GameObject[] showedpla = new GameObject[4];
-    public MonsterCard[] allEnemy=new MonsterCard[20]; //��ͨ���˳���˳��   -----------
-    public MonsterCard[] anotherEnemy = new MonsterCard[20];//bossս�ڶ��غϵ���    -----------
+    public MonsterCard[] allEnemy = new MonsterCard[4];//--------
     public bool[] isEmpty; //��ҷ��Ƿ��г�ս��
     public bool[] isUsed;//�Ƿ�ѡ���׼�
     public Camera uiCamera;
-    public int life;//���ʣ����������   ---------------
-    public bool isboss;//�Ƿ���bossս  ----------------
+    private bool isboss;//�Ƿ���bossս  ----------------
     public bool isFirstGame;
-    private bool isActive;//bossս�Ƿ����ڶ��غ�
-    private int numofRound = 0;//�غ���
+    public bool isActive;//bossս�Ƿ����ڶ��غ�
+    private bool firround;//�غ���
     public MonsterCard[] firstlinecards;//��һ�ŵ���
     public GameObject[] firshowed;
     private MonsterCard[] secondlinecards;//�ڶ��ŵ���
@@ -37,7 +37,7 @@ public class gamecontroller : MonoBehaviour
     private bool ready;//�з��Ƿ񹥻�
     private int idofDe1; //��ҷ��赲ӡ��ӵ����id
     private int idofDe2; //�з��赲ӡ��ӵ����id
-    public int idofThi;
+    public int idofThi = -1;
     private int damagePlayerReceived;
     private int damageEnemyReceived;
     private bool gameOver;
@@ -61,9 +61,12 @@ public class gamecontroller : MonoBehaviour
     public bool mov = false;
     public bool sho = false;
     public bool del = false;
+    public string path;
+    public Image balanceimage;
     // Start is called before the first frame update
     void Start()
     {
+        firround = true;
         text.SetActive(false);
         whiteBlock.SetActive(false);
         uiCamera.transform.position = v1;
@@ -103,23 +106,37 @@ public class gamecontroller : MonoBehaviour
         secondv[1] = new Vector2(-260, 540);
         secondv[2] = new Vector2(0, 540);
         secondv[3] = new Vector2(260, 540);
-        if (isboss)
+        if (GlobalData.levelid==4)
         {
-            if(life==2)
+            isboss = true;
+            isFirstGame = false;
+            if(GlobalData.life==2)
             {
                 ShowText(0);
-                life = 1;
+                GlobalData.life = 1;
             }
+        }
+        else if(GlobalData.levelid==1)
+        {
+            isboss = false;
+            isFirstGame = true;
+        }
+        else
+        {
+            isboss = false;
+            isFirstGame = false;
         }
         data = GetComponent<CardStore>();
         re = false;
+        path = "balanceimage/0";
+        balanceimage.sprite = Resources.Load<Sprite>(path);
     }
     // Update is called once per frame
     void Update()
     {
         if (att || del || sho || mov)
             return;
-        if (isMove)
+        if (isMove && ((isboss && !firround&&begin)||!isboss||(!begin&&isboss&&firround)))
         {
             if (turnLeft)
             {
@@ -148,10 +165,17 @@ public class gamecontroller : MonoBehaviour
             mov = true;
             return;
         }
-        ChangeShowedCard();
+        else if (isMove && (isboss && firround&&begin))
+            { firround = false;isMove = false; }
+            ChangeShowedCard();
         if (ind >= 4)
         {
             int result = damageEnemyReceived - damagePlayerReceived;
+            path = $"balanceimage/{result.ToString()}";
+            if (result > 5) path = "balanceimage/5";
+            else if(result<-5) path = "balanceimage/-5";
+            Sprite newSprite = Resources.Load<Sprite>(path);
+            balanceimage.sprite = newSprite;
             //Debug.Log("result:" + result);
             gameOver = result > 5 || result < -5;
             if (gameOver)
@@ -228,10 +252,9 @@ public class gamecontroller : MonoBehaviour
         }
         else
         {
-            inited = true;
-            //InitEnemy();
+            //inited = true;
+            InitEnemy();
         }
-        //InitEnemy();
     }
     //������ʾ
     private void Buildcard(int line,MonsterCard card,int id)
@@ -328,11 +351,7 @@ public class gamecontroller : MonoBehaviour
     //��ʼ���ص�һ�ŵ���
     private void InitEnemy()
     {
-        Array.Copy(allEnemy, 0, firstlinecards, 0, 4);
-        for(int i=0;i<4;i++)
-        {
-            Buildcard(1, firstlinecards[i], i);
-        }
+        LoadEnemy();
         if (isboss)
         {
             if (isActive)
@@ -342,6 +361,8 @@ public class gamecontroller : MonoBehaviour
             }
             else
             {
+                firstlinecards[0] = new MonsterCard((MonsterCard)data.cards[15]);
+                Buildcard(1, firstlinecards[0], 0);
                 ShowText(1);
                 sho = true;
             }
@@ -373,63 +394,76 @@ public class gamecontroller : MonoBehaviour
     //ÿ�غϼ��صڶ��ŵ���
     private void LoadEnemy()
     {
-        numofRound++;
-        if (numofRound * 4 < allEnemy.Length)
+        GetComponent<LoadEnemy>().SetEnemy();
+        if (secondlinecards[0] == null && allEnemy[0] != null)
         {
-            if (secondlinecards[0] == null)
+            if (firstline.Count == 0)
             {
-                if (firstline.Count == 0)
-                    secondlinecards[0] = allEnemy[numofRound * 4];
-                else
-                {
-                    secondlinecards[0] = firstline.Dequeue();
-                    firstline.Enqueue(allEnemy[numofRound * 4]);
-                }
+                secondlinecards[0] = allEnemy[0];
+                Buildcard(2, secondlinecards[0], 0);
             }
             else
-                firstline.Enqueue(allEnemy[numofRound * 4]);
-
-            if (secondlinecards[1] == null)
             {
-                if (firstline.Count == 0)
-                    secondlinecards[1] = allEnemy[numofRound * 4 + 1];
-                else
-                {
-                    secondlinecards[1] = secondline.Dequeue();
-                    firstline.Enqueue(allEnemy[numofRound * 4 + 1]);
-                }
+                secondlinecards[0] = firstline.Dequeue();
+                Buildcard(2, secondlinecards[0], 0);
+                firstline.Enqueue(allEnemy[0]);
             }
-            else
-                firstline.Enqueue(allEnemy[numofRound * 4 + 1]);
-
-            if (secondlinecards[2] == null)
-            {
-                if (firstline.Count == 0)
-                    secondlinecards[2] = allEnemy[numofRound * 4 + 2];
-                else
-                {
-                    secondlinecards[2] = thirdline.Dequeue();
-                    firstline.Enqueue(allEnemy[numofRound * 4 + 2]);
-                }
-            }
-            else
-                firstline.Enqueue(allEnemy[numofRound * 4 + 2]);
-
-            if (secondlinecards[3] == null)
-            {
-                if (firstline.Count == 0)
-                    secondlinecards[3] = allEnemy[numofRound * 4 + 3];
-                else
-                {
-                    secondlinecards[3] = fourthline.Dequeue();
-                    firstline.Enqueue(allEnemy[numofRound * 4 + 3]);
-                }
-            }
-            else
-                firstline.Enqueue(allEnemy[numofRound * 4 + 3]);
         }
+        else if (allEnemy[0] != null)
+            firstline.Enqueue(allEnemy[0]);
+
+        if (secondlinecards[1] == null && allEnemy[1] != null)
+        {
+            if (firstline.Count == 0)
+            {
+                secondlinecards[1] = allEnemy[1];
+                Buildcard(2, secondlinecards[1], 1);
+            }
+            else
+            {
+                secondlinecards[1] = secondline.Dequeue();
+                Buildcard(2, secondlinecards[1], 1);
+                firstline.Enqueue(allEnemy[1]);
+            }
+        }
+        else if (allEnemy[1] != null)
+            firstline.Enqueue(allEnemy[1]);
+
+        if (secondlinecards[2] == null && allEnemy[2] != null)
+        {
+            if (firstline.Count == 0)
+            {
+                secondlinecards[2] = allEnemy[2];
+                Buildcard(2, secondlinecards[2], 2);
+            }
+            else
+            {
+                secondlinecards[2] = thirdline.Dequeue();
+                Buildcard(2, secondlinecards[2], 2);
+                firstline.Enqueue(allEnemy[2]);
+            }
+        }
+        else if (allEnemy[2] != null)
+            firstline.Enqueue(allEnemy[2]);
+
+        if (secondlinecards[3] == null && allEnemy[3] != null)
+        {
+            if (firstline.Count == 0)
+            {
+                secondlinecards[3] = allEnemy[3];
+                Buildcard(2, secondlinecards[3], 3);
+            }
+            else
+            {
+                secondlinecards[3] = fourthline.Dequeue();
+                Buildcard(2, secondlinecards[3], 3);
+                firstline.Enqueue(allEnemy[3]);
+            }
+        }
+        else if (allEnemy[3] != null)
+            firstline.Enqueue(allEnemy[3]);
+
     }
-    //��Ϸ����
     private void GameOver(bool playerWin)
     {
         if(playerWin)
@@ -447,17 +481,17 @@ public class gamecontroller : MonoBehaviour
     private void VectResult()
     {
         ShowText(7);
-        SceneManager.LoadScene("cardstore");
+        GetComponent<SceneChange1>().LoadSceneWithWhiteFade("cardstore");
         //
     }
 
     private void FailedResult()
     {
-        if (life == 2)
+        if (GlobalData.life == 2)
         {
-            life--;
+            GlobalData.life--;
             ShowText(3);
-            SceneManager.LoadScene("PlayScenes");
+            GetComponent<SceneChange1>().LoadSceneWithWhiteFade("PlayScenes");
             //���ص�ͼ
         }
         else
@@ -711,12 +745,12 @@ public class gamecontroller : MonoBehaviour
             {
                 a.isFur = false;
                 a.targetPosition1 = positionpla[id];
-                if (isFlying) damageEnemyReceived += playercards[id].attack;
+                if (isFlying) damagePlayerReceived += firstlinecards[id].attack;
                 else if (isPio)
                 {
-                    if (firstlinecards[id] != null)
-                        firstlinecards[id].health = 0;
-                    else damageEnemyReceived += playercards[id].attack;
+                    if (playercards[id] != null)
+                        playercards[id].health = 0;
+                    else damagePlayerReceived += firstlinecards[id].attack;
                 }
                 else
                     AttackFront2(firstlinecards[id], id);
@@ -731,51 +765,53 @@ public class gamecontroller : MonoBehaviour
         }
         if (isMot)
         {
-            if (turnLeft)
-            {
-                if (id > 0 && firstlinecards[id - 1] == null)
+            if((isboss && !firround) || !isboss){
+                if (turnLeft)
                 {
-                    firstlinecards[id - 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
-                }
-                else if(id>0&&id!=3)
-                {
-                    if (firstlinecards[id + 1] == null)
-                    {
-                        firstlinecards[id + 1] = firstlinecards[id];
-                        firstlinecards[id] = null;
-                        turnLeft = false;
-                    }
-                }
-                else if (id == 0 && firstlinecards[id + 1] == null)
-                {
-                    firstlinecards[id + 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
-                }
-                else return;
-            }
-            else
-            {
-                if (id < 3 && firstlinecards[id + 1] == null)
-                {
-                    firstlinecards[id + 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
-                }
-                else if(id<3&&id!=0)
-                {
-                    if (firstlinecards[id - 1] == null)
+                    if (id > 0 && firstlinecards[id - 1] == null)
                     {
                         firstlinecards[id - 1] = firstlinecards[id];
                         firstlinecards[id] = null;
-                        turnLeft = true;
                     }
+                    else if (id > 0 && id != 3)
+                    {
+                        if (firstlinecards[id + 1] == null)
+                        {
+                            firstlinecards[id + 1] = firstlinecards[id];
+                            firstlinecards[id] = null;
+                            turnLeft = false;
+                        }
+                    }
+                    else if (id == 0 && firstlinecards[id + 1] == null)
+                    {
+                        firstlinecards[id + 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                    }
+                    else return;
                 }
-                else if (id == 3 && firstlinecards[id - 1] == null)
+                else
                 {
-                    firstlinecards[id - 1] = firstlinecards[id];
-                    firstlinecards[id] = null;
+                    if (id < 3 && firstlinecards[id + 1] == null)
+                    {
+                        firstlinecards[id + 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                    }
+                    else if (id < 3 && id != 0)
+                    {
+                        if (firstlinecards[id - 1] == null)
+                        {
+                            firstlinecards[id - 1] = firstlinecards[id];
+                            firstlinecards[id] = null;
+                            turnLeft = true;
+                        }
+                    }
+                    else if (id == 3 && firstlinecards[id - 1] == null)
+                    {
+                        firstlinecards[id - 1] = firstlinecards[id];
+                        firstlinecards[id] = null;
+                    }
+                    else return;
                 }
-                else return;
             }
             isMove = true;
             moveid = id;
@@ -1042,10 +1078,9 @@ public class gamecontroller : MonoBehaviour
     private void ReBegin1()
     {
         isActive = true;
+        GetComponent<LoadEnemy>().inited = false;
         damageEnemyReceived = 0;
         damagePlayerReceived = 0;
-        numofRound = 0;
-        allEnemy = anotherEnemy;
         for(int i=0;i<4;i++)
         {
             if (playercards[i]!=null)
@@ -1054,28 +1089,16 @@ public class gamecontroller : MonoBehaviour
                 showedpla[i].GetComponent<CardDisplay>().card = playercards[i];
                 showedpla[i].GetComponent<CardDisplay>().ShowCard();
             }
-            firstlinecards[i] = null;
-            if (firshowed[i] != null)
-                firshowed[i].GetComponent<DelEvent>().enabled = true;
-            firshowed[i] = null;
-            secondlinecards[i] = null;
-            if (secshowed[i]!=null)
-                secshowed[i].GetComponent<DelEvent>().enabled = true;
-            secshowed[i] = null;
         }
         firstline = new Queue<MonsterCard>();
         secondline = new Queue<MonsterCard>();
         thirdline = new Queue<MonsterCard>();
         fourthline = new Queue<MonsterCard>();
-        allEnemy = anotherEnemy;
         Invoke("ReBegin2", 1f);
     }
 
     private void ReBegin2()
     {
-        firstlinecards[1] = new MonsterCard((MonsterCard)GetComponent<CardStore>().cards[12]);
-        Buildcard(1, firstlinecards[1], 1);
-        idofThi = 1;
         isplayerbout = true;
         begin = false;
         ready = false;
